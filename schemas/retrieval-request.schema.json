@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentknowledgevault.dev/schemas/v0.1/retrieval-request.schema.json",
+  "title": "Retrieval Request v0.1",
+  "description": "A bounded request for a task-scoped Context Capsule.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "query", "mode", "budget"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "query": {"type": "string", "minLength": 1, "maxLength": 4096},
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "summary": {"type": "string", "minLength": 1, "maxLength": 2048},
+        "repository": {"type": "string", "minLength": 1, "maxLength": 512},
+        "languages": {
+          "type": "array",
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 64}
+        },
+        "topics": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 128}
+        }
+      }
+    },
+    "scope": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "default": ["global"],
+      "items": {
+        "type": "string",
+        "pattern": "^(global(?:/[A-Za-z0-9][A-Za-z0-9._-]{0,127})*|(?:project|research|private)/[A-Za-z0-9][A-Za-z0-9._-]{0,127}(?:/[A-Za-z0-9][A-Za-z0-9._-]{0,127})*)$"
+      }
+    },
+    "mode": {"enum": ["fast", "auto", "thorough"]},
+    "tokenizer": {
+      "description": "Optional exact caller tokenizer identity. Omission selects the UTF-8 byte fallback unless the service has an exact negotiated tokenizer.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1, "maxLength": 256}
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_tokens", "max_bytes", "max_evidence_items"],
+      "properties": {
+        "max_tokens": {"type": "integer", "minimum": 1, "maximum": 1000000},
+        "max_bytes": {"type": "integer", "minimum": 1, "maximum": 1000000000},
+        "max_evidence_items": {"type": "integer", "minimum": 0, "maximum": 1000}
+      }
+    }
+  }
+}
