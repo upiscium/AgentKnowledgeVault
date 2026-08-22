@@ -1,0 +1,9 @@
+{
+  "profile_version": "level0-budgets-v1",
+  "tokenizer": {"id": "test:unicode-codepoint-v1", "definition": "one Unicode code point equals one token"},
+  "profiles": {
+    "small": {"max_tokens": 900, "max_bytes": 3600, "max_evidence_items": 1},
+    "normal": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3},
+    "large": {"max_tokens": 4000, "max_bytes": 16000, "max_evidence_items": 6}
+  }
+}

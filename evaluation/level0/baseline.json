@@ -1,0 +1,2106 @@
+{
+  "analysis": {
+    "budget_failure_queries": [],
+    "candidate_generation_failure_queries": [
+      "q08-synonym-paraphrase",
+      "q09-abbreviation"
+    ],
+    "intentional_eligibility_exclusion_queries": [
+      "q07-near-lookalike",
+      "q14-eligibility-distractors"
+    ],
+    "ranking_failure_queries": [
+      "q15-ranking-sensitive"
+    ],
+    "strong_query_classes": [
+      "body_lexical",
+      "common_noise_query",
+      "distractor_heavy",
+      "exact_tag",
+      "exact_title",
+      "expanded_form",
+      "global_project_scope",
+      "multi_term",
+      "near_lookalike",
+      "no_match",
+      "stale_noncanonical_conditional_distractor",
+      "technical_identifier"
+    ],
+    "weak_query_classes": [
+      "abbreviation_expanded_form",
+      "multiple_relevant_refs",
+      "ranking_sensitive",
+      "synonym_paraphrase"
+    ]
+  },
+  "dataset_version": "level0-golden-v1",
+  "fixture_sha256": "45cf739c537e9ccf6bbe7286e6289556460ac435d32f3f84a4c9f26da2b321aa",
+  "implementation": "Level0RetrievalService issue-6 baseline",
+  "implementation_sha256": "addc24c62aa71620b06fabd122c56c8091b9e6ff775dbb2853e4f09e61792cdc",
+  "level": 0,
+  "level1_recommendation": {
+    "basis": "normal profile records 2 candidate-generation misses and 1 ranking miss; expansion and reranking address distinct failures",
+    "direction": "C. hybrid"
+  },
+  "profile_version": "level0-budgets-v1",
+  "profiles": {
+    "large": {
+      "budget": {
+        "max_bytes": 16000,
+        "max_evidence_items": 6,
+        "max_tokens": 4000
+      },
+      "failure_counts": {
+        "budget_or_evidence_cap": 0,
+        "candidate_generation": 2,
+        "eligibility_gate": 6,
+        "ranking_outside_top3": 1
+      },
+      "metrics": {
+        "max_exact_token_count": 1603,
+        "mean_capsule_serialized_bytes": 772.75,
+        "mean_exact_token_count": 772.75,
+        "mean_selected_count": 1.3125,
+        "mrr": 0.788462,
+        "no_match_accuracy": 0.875,
+        "precision_at_1": 0.769231,
+        "precision_at_3": 0.282051,
+        "recall_at_1": 0.730769,
+        "recall_at_3": 0.769231,
+        "unsupported_query_count": 2,
+        "wrong_selection_count": 9
+      },
+      "per_query": [
+        {
+          "capsule_serialized_bytes": 1000,
+          "eligible_ranked_refs": [
+            "vault://global/transactions/atomic-write",
+            "vault://global/storage/database-write-lock"
+          ],
+          "exact_token_count": 1000,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/transactions/atomic-write"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/transactions/atomic-write",
+            "vault://global/storage/database-write-lock",
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "exact_title",
+          "query_id": "q01-exact-title",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 2,
+          "selected_refs": [
+            "vault://global/transactions/atomic-write",
+            "vault://global/storage/database-write-lock"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/transactions/atomic-write"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": [
+            "vault://global/storage/database-write-lock"
+          ]
+        },
+        {
+          "capsule_serialized_bytes": 644,
+          "eligible_ranked_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "exact_token_count": 644,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "exact_tag",
+          "query_id": "q02-exact-tag",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 627,
+          "eligible_ranked_refs": [
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "exact_token_count": 627,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://project/terreate/buffer-write-contract",
+            "vault://global/transactions/atomic-write"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "technical_identifier",
+          "query_id": "q03-technical-identifier",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "selected_relevant_refs": [
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 647,
+          "eligible_ranked_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "exact_token_count": 647,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "body_lexical",
+          "query_id": "q04-body-lexical",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 1023,
+          "eligible_ranked_refs": [
+            "vault://global/events/append-only-history",
+            "vault://global/transactions/atomic-write"
+          ],
+          "exact_token_count": 1023,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/events/append-only-history"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/events/append-only-history",
+            "vault://global/transactions/atomic-write",
+            "vault://global/eligibility/conditional"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "multi_term",
+          "query_id": "q05-multi-term",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 2,
+          "selected_refs": [
+            "vault://global/events/append-only-history",
+            "vault://global/transactions/atomic-write"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/events/append-only-history"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": [
+            "vault://global/transactions/atomic-write"
+          ]
+        },
+        {
+          "capsule_serialized_bytes": 603,
+          "eligible_ranked_refs": [
+            "vault://project/terreate/scope-shared"
+          ],
+          "exact_token_count": 603,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://project/terreate/scope-shared"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/scope/shared-operation",
+            "vault://project/terreate/scope-shared",
+            "vault://project/terreatex/scope-lookalike",
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor",
+            "vault://global/ranking/z-authoritative"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "global_project_scope",
+          "query_id": "q06-project-scope",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://project/terreate/scope-shared"
+          ],
+          "selected_relevant_refs": [
+            "vault://project/terreate/scope-shared"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": true,
+          "expected_relevant_refs": [],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [
+              "vault://project/terreatex/scope-lookalike"
+            ],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://project/terreatex/scope-lookalike"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "near_lookalike",
+          "query_id": "q07-near-lookalike",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [
+              "vault://global/execution/effect-time-validation"
+            ],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [],
+          "no_match_correct": false,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "synonym_paraphrase",
+          "query_id": "q08-synonym-paraphrase",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [
+              "vault://global/network/transport-layer-security"
+            ],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [],
+          "no_match_correct": false,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "abbreviation_expanded_form",
+          "query_id": "q09-abbreviation",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 1000,
+          "eligible_ranked_refs": [
+            "vault://global/storage/database-write-lock",
+            "vault://global/transactions/atomic-write"
+          ],
+          "exact_token_count": 1000,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/storage/database-write-lock"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/storage/database-write-lock",
+            "vault://project/terreate/buffer-write-contract",
+            "vault://global/transactions/atomic-write"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "common_noise_query",
+          "query_id": "q10-common-noise",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 2,
+          "selected_refs": [
+            "vault://global/storage/database-write-lock",
+            "vault://global/transactions/atomic-write"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/storage/database-write-lock"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": [
+            "vault://global/transactions/atomic-write"
+          ]
+        },
+        {
+          "capsule_serialized_bytes": 940,
+          "eligible_ranked_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "exact_token_count": 940,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.666667,
+          "query_class": "multiple_relevant_refs",
+          "query_id": "q11-multiple-relevant",
+          "recall_at_1": 0.5,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 2,
+          "selected_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 1603,
+          "eligible_ranked_refs": [
+            "vault://global/observability/request-correlation",
+            "vault://global/http/request-validation",
+            "vault://global/http/request-retry",
+            "vault://global/http/request-routing"
+          ],
+          "exact_token_count": 1603,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/observability/request-correlation"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/observability/request-correlation",
+            "vault://global/http/request-validation",
+            "vault://global/http/request-retry",
+            "vault://global/http/request-routing"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "distractor_heavy",
+          "query_id": "q12-distractor-heavy",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 4,
+          "selected_refs": [
+            "vault://global/observability/request-correlation",
+            "vault://global/http/request-validation",
+            "vault://global/http/request-retry",
+            "vault://global/http/request-routing"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/observability/request-correlation"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": [
+            "vault://global/http/request-validation",
+            "vault://global/http/request-retry",
+            "vault://global/http/request-routing"
+          ]
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": true,
+          "expected_relevant_refs": [],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [],
+          "no_match_correct": true,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "no_match",
+          "query_id": "q13-no-match",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": true,
+          "expected_relevant_refs": [],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [
+              "vault://global/eligibility/candidate",
+              "vault://global/eligibility/conditional",
+              "vault://global/eligibility/deprecated",
+              "vault://global/eligibility/stale",
+              "vault://global/eligibility/verified"
+            ],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/eligibility/candidate",
+            "vault://global/eligibility/deprecated",
+            "vault://global/eligibility/verified",
+            "vault://global/eligibility/conditional",
+            "vault://global/eligibility/stale"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "stale_noncanonical_conditional_distractor",
+          "query_id": "q14-eligibility-distractors",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 1594,
+          "eligible_ranked_refs": [
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor",
+            "vault://global/ranking/z-authoritative"
+          ],
+          "exact_token_count": 1594,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/ranking/z-authoritative"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": [
+              "vault://global/ranking/z-authoritative"
+            ]
+          },
+          "lexical_candidate_refs": [
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor",
+            "vault://global/ranking/z-authoritative"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "ranking_sensitive",
+          "query_id": "q15-ranking-sensitive",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.25,
+          "reported_no_match": false,
+          "selected_count": 4,
+          "selected_refs": [
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor",
+            "vault://global/ranking/z-authoritative"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/ranking/z-authoritative"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": [
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor"
+          ]
+        },
+        {
+          "capsule_serialized_bytes": 653,
+          "eligible_ranked_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "exact_token_count": 653,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "expanded_form",
+          "query_id": "q16-expanded-form",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        }
+      ],
+      "profile": "large",
+      "query_count": 16,
+      "tokenizer_id": "test:unicode-codepoint-v1"
+    },
+    "normal": {
+      "budget": {
+        "max_bytes": 7200,
+        "max_evidence_items": 3,
+        "max_tokens": 1800
+      },
+      "failure_counts": {
+        "budget_or_evidence_cap": 0,
+        "candidate_generation": 2,
+        "eligibility_gate": 6,
+        "ranking_outside_top3": 1
+      },
+      "metrics": {
+        "max_exact_token_count": 1458,
+        "mean_capsule_serialized_bytes": 753.75,
+        "mean_exact_token_count": 753.75,
+        "mean_selected_count": 1.1875,
+        "mrr": 0.769231,
+        "no_match_accuracy": 0.875,
+        "precision_at_1": 0.769231,
+        "precision_at_3": 0.282051,
+        "recall_at_1": 0.730769,
+        "recall_at_3": 0.769231,
+        "unsupported_query_count": 3,
+        "wrong_selection_count": 8
+      },
+      "per_query": [
+        {
+          "capsule_serialized_bytes": 1000,
+          "eligible_ranked_refs": [
+            "vault://global/transactions/atomic-write",
+            "vault://global/storage/database-write-lock"
+          ],
+          "exact_token_count": 1000,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/transactions/atomic-write"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/transactions/atomic-write",
+            "vault://global/storage/database-write-lock",
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "exact_title",
+          "query_id": "q01-exact-title",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 2,
+          "selected_refs": [
+            "vault://global/transactions/atomic-write",
+            "vault://global/storage/database-write-lock"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/transactions/atomic-write"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": [
+            "vault://global/storage/database-write-lock"
+          ]
+        },
+        {
+          "capsule_serialized_bytes": 644,
+          "eligible_ranked_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "exact_token_count": 644,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "exact_tag",
+          "query_id": "q02-exact-tag",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 627,
+          "eligible_ranked_refs": [
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "exact_token_count": 627,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://project/terreate/buffer-write-contract",
+            "vault://global/transactions/atomic-write"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "technical_identifier",
+          "query_id": "q03-technical-identifier",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "selected_relevant_refs": [
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 647,
+          "eligible_ranked_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "exact_token_count": 647,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "body_lexical",
+          "query_id": "q04-body-lexical",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 1023,
+          "eligible_ranked_refs": [
+            "vault://global/events/append-only-history",
+            "vault://global/transactions/atomic-write"
+          ],
+          "exact_token_count": 1023,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/events/append-only-history"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/events/append-only-history",
+            "vault://global/transactions/atomic-write",
+            "vault://global/eligibility/conditional"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "multi_term",
+          "query_id": "q05-multi-term",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 2,
+          "selected_refs": [
+            "vault://global/events/append-only-history",
+            "vault://global/transactions/atomic-write"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/events/append-only-history"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": [
+            "vault://global/transactions/atomic-write"
+          ]
+        },
+        {
+          "capsule_serialized_bytes": 603,
+          "eligible_ranked_refs": [
+            "vault://project/terreate/scope-shared"
+          ],
+          "exact_token_count": 603,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://project/terreate/scope-shared"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/scope/shared-operation",
+            "vault://project/terreate/scope-shared",
+            "vault://project/terreatex/scope-lookalike",
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor",
+            "vault://global/ranking/z-authoritative"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "global_project_scope",
+          "query_id": "q06-project-scope",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://project/terreate/scope-shared"
+          ],
+          "selected_relevant_refs": [
+            "vault://project/terreate/scope-shared"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": true,
+          "expected_relevant_refs": [],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [
+              "vault://project/terreatex/scope-lookalike"
+            ],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://project/terreatex/scope-lookalike"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "near_lookalike",
+          "query_id": "q07-near-lookalike",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [
+              "vault://global/execution/effect-time-validation"
+            ],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [],
+          "no_match_correct": false,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "synonym_paraphrase",
+          "query_id": "q08-synonym-paraphrase",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [
+              "vault://global/network/transport-layer-security"
+            ],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [],
+          "no_match_correct": false,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "abbreviation_expanded_form",
+          "query_id": "q09-abbreviation",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 1000,
+          "eligible_ranked_refs": [
+            "vault://global/storage/database-write-lock",
+            "vault://global/transactions/atomic-write"
+          ],
+          "exact_token_count": 1000,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/storage/database-write-lock"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/storage/database-write-lock",
+            "vault://project/terreate/buffer-write-contract",
+            "vault://global/transactions/atomic-write"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "common_noise_query",
+          "query_id": "q10-common-noise",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 2,
+          "selected_refs": [
+            "vault://global/storage/database-write-lock",
+            "vault://global/transactions/atomic-write"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/storage/database-write-lock"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": [
+            "vault://global/transactions/atomic-write"
+          ]
+        },
+        {
+          "capsule_serialized_bytes": 940,
+          "eligible_ranked_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "exact_token_count": 940,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.666667,
+          "query_class": "multiple_relevant_refs",
+          "query_id": "q11-multiple-relevant",
+          "recall_at_1": 0.5,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 2,
+          "selected_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 1458,
+          "eligible_ranked_refs": [
+            "vault://global/observability/request-correlation",
+            "vault://global/http/request-validation",
+            "vault://global/http/request-retry",
+            "vault://global/http/request-routing"
+          ],
+          "exact_token_count": 1458,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/observability/request-correlation"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/observability/request-correlation",
+            "vault://global/http/request-validation",
+            "vault://global/http/request-retry",
+            "vault://global/http/request-routing"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "distractor_heavy",
+          "query_id": "q12-distractor-heavy",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 3,
+          "selected_refs": [
+            "vault://global/observability/request-correlation",
+            "vault://global/http/request-validation",
+            "vault://global/http/request-retry"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/observability/request-correlation"
+          ],
+          "status": "degraded",
+          "terminal_reason": "budget_limited",
+          "wrong_selected_refs": [
+            "vault://global/http/request-validation",
+            "vault://global/http/request-retry"
+          ]
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": true,
+          "expected_relevant_refs": [],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [],
+          "no_match_correct": true,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "no_match",
+          "query_id": "q13-no-match",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": true,
+          "expected_relevant_refs": [],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [
+              "vault://global/eligibility/candidate",
+              "vault://global/eligibility/conditional",
+              "vault://global/eligibility/deprecated",
+              "vault://global/eligibility/stale",
+              "vault://global/eligibility/verified"
+            ],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/eligibility/candidate",
+            "vault://global/eligibility/deprecated",
+            "vault://global/eligibility/verified",
+            "vault://global/eligibility/conditional",
+            "vault://global/eligibility/stale"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "stale_noncanonical_conditional_distractor",
+          "query_id": "q14-eligibility-distractors",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 1435,
+          "eligible_ranked_refs": [
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor",
+            "vault://global/ranking/z-authoritative"
+          ],
+          "exact_token_count": 1435,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/ranking/z-authoritative"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": [
+              "vault://global/ranking/z-authoritative"
+            ]
+          },
+          "lexical_candidate_refs": [
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor",
+            "vault://global/ranking/z-authoritative"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "ranking_sensitive",
+          "query_id": "q15-ranking-sensitive",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": false,
+          "selected_count": 3,
+          "selected_refs": [
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor"
+          ],
+          "selected_relevant_refs": [],
+          "status": "degraded",
+          "terminal_reason": "budget_limited",
+          "wrong_selected_refs": [
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor"
+          ]
+        },
+        {
+          "capsule_serialized_bytes": 653,
+          "eligible_ranked_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "exact_token_count": 653,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "expanded_form",
+          "query_id": "q16-expanded-form",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        }
+      ],
+      "profile": "normal",
+      "query_count": 16,
+      "tokenizer_id": "test:unicode-codepoint-v1"
+    },
+    "small": {
+      "budget": {
+        "max_bytes": 3600,
+        "max_evidence_items": 1,
+        "max_tokens": 900
+      },
+      "failure_counts": {
+        "budget_or_evidence_cap": 1,
+        "candidate_generation": 2,
+        "eligibility_gate": 6,
+        "ranking_outside_top3": 1
+      },
+      "metrics": {
+        "max_exact_token_count": 830,
+        "mean_capsule_serialized_bytes": 624.1875,
+        "mean_exact_token_count": 624.1875,
+        "mean_selected_count": 0.6875,
+        "mrr": 0.769231,
+        "no_match_accuracy": 0.875,
+        "precision_at_1": 0.769231,
+        "precision_at_3": 0.25641,
+        "recall_at_1": 0.730769,
+        "recall_at_3": 0.730769,
+        "unsupported_query_count": 3,
+        "wrong_selection_count": 1
+      },
+      "per_query": [
+        {
+          "capsule_serialized_bytes": 830,
+          "eligible_ranked_refs": [
+            "vault://global/transactions/atomic-write",
+            "vault://global/storage/database-write-lock"
+          ],
+          "exact_token_count": 830,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/transactions/atomic-write"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/transactions/atomic-write",
+            "vault://global/storage/database-write-lock",
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "exact_title",
+          "query_id": "q01-exact-title",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/transactions/atomic-write"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/transactions/atomic-write"
+          ],
+          "status": "degraded",
+          "terminal_reason": "budget_limited",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 644,
+          "eligible_ranked_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "exact_token_count": 644,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "exact_tag",
+          "query_id": "q02-exact-tag",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/storage/derived-lexical-index"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 627,
+          "eligible_ranked_refs": [
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "exact_token_count": 627,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://project/terreate/buffer-write-contract",
+            "vault://global/transactions/atomic-write"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "technical_identifier",
+          "query_id": "q03-technical-identifier",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "selected_relevant_refs": [
+            "vault://project/terreate/buffer-write-contract"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 647,
+          "eligible_ranked_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "exact_token_count": 647,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "body_lexical",
+          "query_id": "q04-body-lexical",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 813,
+          "eligible_ranked_refs": [
+            "vault://global/events/append-only-history",
+            "vault://global/transactions/atomic-write"
+          ],
+          "exact_token_count": 813,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/events/append-only-history"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/events/append-only-history",
+            "vault://global/transactions/atomic-write",
+            "vault://global/eligibility/conditional"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "multi_term",
+          "query_id": "q05-multi-term",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/events/append-only-history"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/events/append-only-history"
+          ],
+          "status": "degraded",
+          "terminal_reason": "budget_limited",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 603,
+          "eligible_ranked_refs": [
+            "vault://project/terreate/scope-shared"
+          ],
+          "exact_token_count": 603,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://project/terreate/scope-shared"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/scope/shared-operation",
+            "vault://project/terreate/scope-shared",
+            "vault://project/terreatex/scope-lookalike",
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor",
+            "vault://global/ranking/z-authoritative"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "global_project_scope",
+          "query_id": "q06-project-scope",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://project/terreate/scope-shared"
+          ],
+          "selected_relevant_refs": [
+            "vault://project/terreate/scope-shared"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": true,
+          "expected_relevant_refs": [],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [
+              "vault://project/terreatex/scope-lookalike"
+            ],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://project/terreatex/scope-lookalike"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "near_lookalike",
+          "query_id": "q07-near-lookalike",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/execution/effect-time-validation"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [
+              "vault://global/execution/effect-time-validation"
+            ],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [],
+          "no_match_correct": false,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "synonym_paraphrase",
+          "query_id": "q08-synonym-paraphrase",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [
+              "vault://global/network/transport-layer-security"
+            ],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [],
+          "no_match_correct": false,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "abbreviation_expanded_form",
+          "query_id": "q09-abbreviation",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 790,
+          "eligible_ranked_refs": [
+            "vault://global/storage/database-write-lock",
+            "vault://global/transactions/atomic-write"
+          ],
+          "exact_token_count": 790,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/storage/database-write-lock"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/storage/database-write-lock",
+            "vault://project/terreate/buffer-write-contract",
+            "vault://global/transactions/atomic-write"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "common_noise_query",
+          "query_id": "q10-common-noise",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/storage/database-write-lock"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/storage/database-write-lock"
+          ],
+          "status": "degraded",
+          "terminal_reason": "budget_limited",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 762,
+          "eligible_ranked_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "exact_token_count": 762,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [
+              "vault://project/terreate/cache-invalidation"
+            ],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/cache/invalidation",
+            "vault://project/terreate/cache-invalidation"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "multiple_relevant_refs",
+          "query_id": "q11-multiple-relevant",
+          "recall_at_1": 0.5,
+          "recall_at_3": 0.5,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/cache/invalidation"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/cache/invalidation"
+          ],
+          "status": "degraded",
+          "terminal_reason": "budget_limited",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 815,
+          "eligible_ranked_refs": [
+            "vault://global/observability/request-correlation",
+            "vault://global/http/request-validation",
+            "vault://global/http/request-retry",
+            "vault://global/http/request-routing"
+          ],
+          "exact_token_count": 815,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/observability/request-correlation"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/observability/request-correlation",
+            "vault://global/http/request-validation",
+            "vault://global/http/request-retry",
+            "vault://global/http/request-routing"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "distractor_heavy",
+          "query_id": "q12-distractor-heavy",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/observability/request-correlation"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/observability/request-correlation"
+          ],
+          "status": "degraded",
+          "terminal_reason": "budget_limited",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": true,
+          "expected_relevant_refs": [],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [],
+          "no_match_correct": true,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "no_match",
+          "query_id": "q13-no-match",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 406,
+          "eligible_ranked_refs": [],
+          "exact_token_count": 406,
+          "expected_no_match": true,
+          "expected_relevant_refs": [],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [
+              "vault://global/eligibility/candidate",
+              "vault://global/eligibility/conditional",
+              "vault://global/eligibility/deprecated",
+              "vault://global/eligibility/stale",
+              "vault://global/eligibility/verified"
+            ],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/eligibility/candidate",
+            "vault://global/eligibility/deprecated",
+            "vault://global/eligibility/verified",
+            "vault://global/eligibility/conditional",
+            "vault://global/eligibility/stale"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "stale_noncanonical_conditional_distractor",
+          "query_id": "q14-eligibility-distractors",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": true,
+          "selected_count": 0,
+          "selected_refs": [],
+          "selected_relevant_refs": [],
+          "status": "failed",
+          "terminal_reason": "insufficient_evidence",
+          "wrong_selected_refs": []
+        },
+        {
+          "capsule_serialized_bytes": 773,
+          "eligible_ranked_refs": [
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor",
+            "vault://global/ranking/z-authoritative"
+          ],
+          "exact_token_count": 773,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/ranking/z-authoritative"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": [
+              "vault://global/ranking/z-authoritative"
+            ]
+          },
+          "lexical_candidate_refs": [
+            "vault://global/ranking/a-distractor",
+            "vault://global/ranking/b-distractor",
+            "vault://global/ranking/c-distractor",
+            "vault://global/ranking/z-authoritative"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 0.0,
+          "precision_at_3": 0.0,
+          "query_class": "ranking_sensitive",
+          "query_id": "q15-ranking-sensitive",
+          "recall_at_1": 0.0,
+          "recall_at_3": 0.0,
+          "reciprocal_rank": 0.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/ranking/a-distractor"
+          ],
+          "selected_relevant_refs": [],
+          "status": "degraded",
+          "terminal_reason": "budget_limited",
+          "wrong_selected_refs": [
+            "vault://global/ranking/a-distractor"
+          ]
+        },
+        {
+          "capsule_serialized_bytes": 653,
+          "eligible_ranked_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "exact_token_count": 653,
+          "expected_no_match": false,
+          "expected_relevant_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "failure_classification": {
+            "budget_or_evidence_cap": [],
+            "candidate_generation": [],
+            "eligibility_gate": [],
+            "ranking_outside_top3": []
+          },
+          "lexical_candidate_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "no_match_correct": true,
+          "precision_at_1": 1.0,
+          "precision_at_3": 0.333333,
+          "query_class": "expanded_form",
+          "query_id": "q16-expanded-form",
+          "recall_at_1": 1.0,
+          "recall_at_3": 1.0,
+          "reciprocal_rank": 1.0,
+          "reported_no_match": false,
+          "selected_count": 1,
+          "selected_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "selected_relevant_refs": [
+            "vault://global/network/transport-layer-security"
+          ],
+          "status": "complete",
+          "terminal_reason": "sufficient",
+          "wrong_selected_refs": []
+        }
+      ],
+      "profile": "small",
+      "query_count": 16,
+      "tokenizer_id": "test:unicode-codepoint-v1"
+    }
+  },
+  "profiles_sha256": "c1dbee18757a0dbba1cb5c0f05635405ef27d96b53f058f61958b08763e137b1",
+  "queries_sha256": "1799557eace3a110aa3da78066449580036757933b172b43278978c464fd1aa8",
+  "query_classes": [
+    "abbreviation_expanded_form",
+    "body_lexical",
+    "common_noise_query",
+    "distractor_heavy",
+    "exact_tag",
+    "exact_title",
+    "expanded_form",
+    "global_project_scope",
+    "multi_term",
+    "multiple_relevant_refs",
+    "near_lookalike",
+    "no_match",
+    "ranking_sensitive",
+    "stale_noncanonical_conditional_distractor",
+    "synonym_paraphrase",
+    "technical_identifier"
+  ],
+  "query_count": 16,
+  "schema_version": "level0-evaluation-v1"
+}

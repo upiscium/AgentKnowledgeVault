@@ -1,0 +1,232 @@
+{
+  "dataset_version": "level0-golden-v1",
+  "evaluation_now": "2026-08-22T12:00:00Z",
+  "records": [
+    {
+      "knowledge_ref": "vault://global/transactions/atomic-write",
+      "knowledge_type": "guidance",
+      "title": "Atomic write protocol",
+      "body": "Commit canonical state and its event in one transaction. Roll back both when event insertion fails.",
+      "tags": ["atomicity", "transactions"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/execution/effect-time-validation",
+      "knowledge_type": "guidance",
+      "title": "Effect-time authority validation",
+      "body": "Revalidate authorization immediately before side effects are applied.",
+      "tags": ["authority", "effect-time"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/storage/derived-lexical-index",
+      "knowledge_type": "architecture",
+      "title": "Derived lexical index ownership",
+      "body": "The lexical index is disposable and rebuildable from canonical Knowledge.",
+      "tags": ["fts5", "index"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/retrieval/budget-accounting",
+      "knowledge_type": "contract",
+      "title": "Context Capsule budget accounting",
+      "body": "Account for every caller-visible field except the top-level budget report.",
+      "tags": ["budget", "capsule"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/retrieval/query-normalization",
+      "knowledge_type": "guidance",
+      "title": "Safe lexical query normalization",
+      "body": "Tokenize caller punctuation and quote normalized words before constructing MATCH syntax.",
+      "tags": ["query", "safety"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/events/append-only-history",
+      "knowledge_type": "contract",
+      "title": "Append-only event history",
+      "body": "Existing knowledge events reject update, delete, and replacement collisions.",
+      "tags": ["events", "history"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/storage/database-write-lock",
+      "knowledge_type": "guidance",
+      "title": "Database write lock",
+      "body": "Use BEGIN IMMEDIATE to serialize database writers safely.",
+      "tags": ["sqlite", "locking"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/network/transport-layer-security",
+      "knowledge_type": "guidance",
+      "title": "Transport Layer Security configuration",
+      "body": "Configure certificate validation for encrypted transport connections.",
+      "tags": ["certificates", "transport-security"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/scheduling/background-work-queue",
+      "knowledge_type": "guidance",
+      "title": "Background work queue",
+      "body": "Asynchronous jobs wait in a durable queue until a worker claims them.",
+      "tags": ["jobs", "queue"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://project/terreate/buffer-write-contract",
+      "knowledge_type": "contract",
+      "title": "Terreate buffer write contract",
+      "body": "BUF_COMMIT_V2 commits a prepared buffer exactly once.",
+      "tags": ["buffer", "terreate"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://project/terreate/scope-shared",
+      "knowledge_type": "guidance",
+      "title": "Terreate scoped operation",
+      "body": "scope-shared-marker belongs to the Terreate project.",
+      "tags": ["scope"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://project/terreatex/scope-lookalike",
+      "knowledge_type": "guidance",
+      "title": "Terreatex lookalike operation",
+      "body": "scope-shared-marker lookalikeboundaryomega belongs to Terreatex.",
+      "tags": ["scope"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/scope/shared-operation",
+      "knowledge_type": "guidance",
+      "title": "Global scoped operation",
+      "body": "scope-shared-marker is globally applicable.",
+      "tags": ["scope"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/cache/invalidation",
+      "knowledge_type": "guidance",
+      "title": "Cache invalidation",
+      "body": "Invalidate cached entries after a schema change.",
+      "tags": ["cache", "invalidation"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://project/terreate/cache-invalidation",
+      "knowledge_type": "guidance",
+      "title": "Terreate cache invalidation",
+      "body": "Invalidate project cache entries after a schema change.",
+      "tags": ["cache", "invalidation"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/observability/request-correlation",
+      "knowledge_type": "guidance",
+      "title": "Request correlation identifier",
+      "body": "Attach trace_id to every request log entry for correlation.",
+      "tags": ["trace_id", "observability"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/http/request-routing",
+      "knowledge_type": "guidance",
+      "title": "Request routing",
+      "body": "Route each request to a matching endpoint handler.",
+      "tags": ["request", "routing"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/http/request-validation",
+      "knowledge_type": "guidance",
+      "title": "Request validation",
+      "body": "Validate request fields before dispatch.",
+      "tags": ["request", "validation"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/http/request-retry",
+      "knowledge_type": "guidance",
+      "title": "Request retry",
+      "body": "Retry an idempotent request after a transient failure.",
+      "tags": ["request", "retry"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/eligibility/stale",
+      "knowledge_type": "guidance",
+      "title": "Stale rotation guidance",
+      "body": "legacyrotationomega describes an expired key rotation process.",
+      "tags": ["eligibility"],
+      "stale_after": "2026-08-22T11:59:59Z",
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/eligibility/candidate",
+      "knowledge_type": "guidance",
+      "title": "Candidate rotation guidance",
+      "body": "legacyrotationomega candidate procedure.",
+      "tags": ["eligibility"],
+      "status": "candidate"
+    },
+    {
+      "knowledge_ref": "vault://global/eligibility/verified",
+      "knowledge_type": "guidance",
+      "title": "Verified rotation guidance",
+      "body": "legacyrotationomega verified but not canonical procedure.",
+      "tags": ["eligibility"],
+      "status": "verified"
+    },
+    {
+      "knowledge_ref": "vault://global/eligibility/deprecated",
+      "knowledge_type": "guidance",
+      "title": "Deprecated rotation guidance",
+      "body": "legacyrotationomega deprecated procedure.",
+      "tags": ["eligibility"],
+      "status": "deprecated"
+    },
+    {
+      "knowledge_ref": "vault://global/eligibility/conditional",
+      "knowledge_type": "guidance",
+      "title": "Conditional rotation guidance",
+      "body": "legacyrotationomega applies only under an opaque condition.",
+      "tags": ["eligibility"],
+      "applies_when": {"operator_defined": "maintenance-window"},
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/ranking/a-distractor",
+      "knowledge_type": "guidance",
+      "title": "Shared ranking guidance",
+      "body": "rankingsharedomega has identical lexical evidence.",
+      "tags": ["ranking"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/ranking/b-distractor",
+      "knowledge_type": "guidance",
+      "title": "Shared ranking guidance",
+      "body": "rankingsharedomega has identical lexical evidence.",
+      "tags": ["ranking"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/ranking/c-distractor",
+      "knowledge_type": "guidance",
+      "title": "Shared ranking guidance",
+      "body": "rankingsharedomega has identical lexical evidence.",
+      "tags": ["ranking"],
+      "status": "canonical"
+    },
+    {
+      "knowledge_ref": "vault://global/ranking/z-authoritative",
+      "knowledge_type": "guidance",
+      "title": "Shared ranking guidance",
+      "body": "rankingsharedomega has identical lexical evidence.",
+      "tags": ["ranking"],
+      "status": "canonical"
+    }
+  ]
+}
