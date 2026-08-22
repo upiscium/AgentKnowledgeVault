@@ -34,7 +34,7 @@
     ]
   },
   "dataset_version": "level0-golden-v1",
-  "fixture_sha256": "45cf739c537e9ccf6bbe7286e6289556460ac435d32f3f84a4c9f26da2b321aa",
+  "fixture_sha256": "e304a65ea316802d1e68f900f73efd2422cf30410e8feaf96030623cbcfe3f3c",
   "implementation": "Level0RetrievalService issue-6 baseline",
   "implementation_sha256": "addc24c62aa71620b06fabd122c56c8091b9e6ff775dbb2853e4f09e61792cdc",
   "level": 0,
@@ -57,10 +57,10 @@
         "ranking_outside_top3": 1
       },
       "metrics": {
-        "max_exact_token_count": 1603,
-        "mean_capsule_serialized_bytes": 772.75,
-        "mean_exact_token_count": 772.75,
-        "mean_selected_count": 1.3125,
+        "max_exact_token_count": 2664,
+        "mean_capsule_serialized_bytes": 839.625,
+        "mean_exact_token_count": 839.625,
+        "mean_selected_count": 1.4375,
         "mrr": 0.788462,
         "no_match_accuracy": 0.875,
         "precision_at_1": 0.769231,
@@ -68,7 +68,7 @@
         "recall_at_1": 0.730769,
         "recall_at_3": 0.769231,
         "unsupported_query_count": 2,
-        "wrong_selection_count": 9
+        "wrong_selection_count": 11
       },
       "per_query": [
         {
@@ -298,11 +298,7 @@
           "lexical_candidate_refs": [
             "vault://global/scope/shared-operation",
             "vault://project/terreate/scope-shared",
-            "vault://project/terreatex/scope-lookalike",
-            "vault://global/ranking/a-distractor",
-            "vault://global/ranking/b-distractor",
-            "vault://global/ranking/c-distractor",
-            "vault://global/ranking/z-authoritative"
+            "vault://project/terreatex/scope-lookalike"
           ],
           "no_match_correct": true,
           "precision_at_1": 1.0,
@@ -635,14 +631,17 @@
           "wrong_selected_refs": []
         },
         {
-          "capsule_serialized_bytes": 1594,
+          "capsule_serialized_bytes": 2664,
           "eligible_ranked_refs": [
             "vault://global/ranking/a-distractor",
             "vault://global/ranking/b-distractor",
             "vault://global/ranking/c-distractor",
-            "vault://global/ranking/z-authoritative"
+            "vault://global/ranking/z-authoritative",
+            "vault://global/network/transport-layer-security",
+            "vault://global/observability/request-correlation",
+            "vault://global/retrieval/budget-accounting"
           ],
-          "exact_token_count": 1594,
+          "exact_token_count": 2664,
           "expected_no_match": false,
           "expected_relevant_refs": [
             "vault://global/ranking/z-authoritative"
@@ -659,7 +658,10 @@
             "vault://global/ranking/a-distractor",
             "vault://global/ranking/b-distractor",
             "vault://global/ranking/c-distractor",
-            "vault://global/ranking/z-authoritative"
+            "vault://global/ranking/z-authoritative",
+            "vault://global/network/transport-layer-security",
+            "vault://global/observability/request-correlation",
+            "vault://global/retrieval/budget-accounting"
           ],
           "no_match_correct": true,
           "precision_at_1": 0.0,
@@ -670,22 +672,26 @@
           "recall_at_3": 0.0,
           "reciprocal_rank": 0.25,
           "reported_no_match": false,
-          "selected_count": 4,
+          "selected_count": 6,
           "selected_refs": [
             "vault://global/ranking/a-distractor",
             "vault://global/ranking/b-distractor",
             "vault://global/ranking/c-distractor",
-            "vault://global/ranking/z-authoritative"
+            "vault://global/ranking/z-authoritative",
+            "vault://global/network/transport-layer-security",
+            "vault://global/observability/request-correlation"
           ],
           "selected_relevant_refs": [
             "vault://global/ranking/z-authoritative"
           ],
-          "status": "complete",
-          "terminal_reason": "sufficient",
+          "status": "degraded",
+          "terminal_reason": "budget_limited",
           "wrong_selected_refs": [
             "vault://global/ranking/a-distractor",
             "vault://global/ranking/b-distractor",
-            "vault://global/ranking/c-distractor"
+            "vault://global/ranking/c-distractor",
+            "vault://global/network/transport-layer-security",
+            "vault://global/observability/request-correlation"
           ]
         },
         {
@@ -745,9 +751,9 @@
         "ranking_outside_top3": 1
       },
       "metrics": {
-        "max_exact_token_count": 1458,
-        "mean_capsule_serialized_bytes": 753.75,
-        "mean_exact_token_count": 753.75,
+        "max_exact_token_count": 1521,
+        "mean_capsule_serialized_bytes": 759.125,
+        "mean_exact_token_count": 759.125,
         "mean_selected_count": 1.1875,
         "mrr": 0.769231,
         "no_match_accuracy": 0.875,
@@ -986,11 +992,7 @@
           "lexical_candidate_refs": [
             "vault://global/scope/shared-operation",
             "vault://project/terreate/scope-shared",
-            "vault://project/terreatex/scope-lookalike",
-            "vault://global/ranking/a-distractor",
-            "vault://global/ranking/b-distractor",
-            "vault://global/ranking/c-distractor",
-            "vault://global/ranking/z-authoritative"
+            "vault://project/terreatex/scope-lookalike"
           ],
           "no_match_correct": true,
           "precision_at_1": 1.0,
@@ -1321,14 +1323,17 @@
           "wrong_selected_refs": []
         },
         {
-          "capsule_serialized_bytes": 1435,
+          "capsule_serialized_bytes": 1521,
           "eligible_ranked_refs": [
             "vault://global/ranking/a-distractor",
             "vault://global/ranking/b-distractor",
             "vault://global/ranking/c-distractor",
-            "vault://global/ranking/z-authoritative"
+            "vault://global/ranking/z-authoritative",
+            "vault://global/network/transport-layer-security",
+            "vault://global/observability/request-correlation",
+            "vault://global/retrieval/budget-accounting"
           ],
-          "exact_token_count": 1435,
+          "exact_token_count": 1521,
           "expected_no_match": false,
           "expected_relevant_refs": [
             "vault://global/ranking/z-authoritative"
@@ -1345,7 +1350,10 @@
             "vault://global/ranking/a-distractor",
             "vault://global/ranking/b-distractor",
             "vault://global/ranking/c-distractor",
-            "vault://global/ranking/z-authoritative"
+            "vault://global/ranking/z-authoritative",
+            "vault://global/network/transport-layer-security",
+            "vault://global/observability/request-correlation",
+            "vault://global/retrieval/budget-accounting"
           ],
           "no_match_correct": true,
           "precision_at_1": 0.0,
@@ -1429,8 +1437,8 @@
       },
       "metrics": {
         "max_exact_token_count": 830,
-        "mean_capsule_serialized_bytes": 624.1875,
-        "mean_exact_token_count": 624.1875,
+        "mean_capsule_serialized_bytes": 625.5,
+        "mean_exact_token_count": 625.5,
         "mean_selected_count": 0.6875,
         "mrr": 0.769231,
         "no_match_accuracy": 0.875,
@@ -1663,11 +1671,7 @@
           "lexical_candidate_refs": [
             "vault://global/scope/shared-operation",
             "vault://project/terreate/scope-shared",
-            "vault://project/terreatex/scope-lookalike",
-            "vault://global/ranking/a-distractor",
-            "vault://global/ranking/b-distractor",
-            "vault://global/ranking/c-distractor",
-            "vault://global/ranking/z-authoritative"
+            "vault://project/terreatex/scope-lookalike"
           ],
           "no_match_correct": true,
           "precision_at_1": 1.0,
@@ -1990,14 +1994,17 @@
           "wrong_selected_refs": []
         },
         {
-          "capsule_serialized_bytes": 773,
+          "capsule_serialized_bytes": 794,
           "eligible_ranked_refs": [
             "vault://global/ranking/a-distractor",
             "vault://global/ranking/b-distractor",
             "vault://global/ranking/c-distractor",
-            "vault://global/ranking/z-authoritative"
+            "vault://global/ranking/z-authoritative",
+            "vault://global/network/transport-layer-security",
+            "vault://global/observability/request-correlation",
+            "vault://global/retrieval/budget-accounting"
           ],
-          "exact_token_count": 773,
+          "exact_token_count": 794,
           "expected_no_match": false,
           "expected_relevant_refs": [
             "vault://global/ranking/z-authoritative"
@@ -2014,7 +2021,10 @@
             "vault://global/ranking/a-distractor",
             "vault://global/ranking/b-distractor",
             "vault://global/ranking/c-distractor",
-            "vault://global/ranking/z-authoritative"
+            "vault://global/ranking/z-authoritative",
+            "vault://global/network/transport-layer-security",
+            "vault://global/observability/request-correlation",
+            "vault://global/retrieval/budget-accounting"
           ],
           "no_match_correct": true,
           "precision_at_1": 0.0,
@@ -2082,7 +2092,7 @@
     }
   },
   "profiles_sha256": "c1dbee18757a0dbba1cb5c0f05635405ef27d96b53f058f61958b08763e137b1",
-  "queries_sha256": "1799557eace3a110aa3da78066449580036757933b172b43278978c464fd1aa8",
+  "queries_sha256": "78282413f572372b1a04fc10199ec20995468d40f25f3e2cced3487f02a4b16e",
   "query_classes": [
     "abbreviation_expanded_form",
     "body_lexical",

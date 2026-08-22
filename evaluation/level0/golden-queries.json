@@ -120,11 +120,11 @@
     {
       "query_id": "q15-ranking-sensitive",
       "query_class": "ranking_sensitive",
-      "request": {"schema_version": "0.1", "query": "rankingsharedomega", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "request": {"schema_version": "0.1", "query": "rankingsharedomega for real systems", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
       "expected_relevant_refs": ["vault://global/ranking/z-authoritative"],
       "expected_irrelevant_refs": ["vault://global/ranking/a-distractor", "vault://global/ranking/b-distractor", "vault://global/ranking/c-distractor"],
       "expected_no_match": false,
-      "notes": "Identical lexical evidence exposes logical-identity tie-break ranking weakness."
+      "notes": "All candidates share the marker, while the relevant live customer-facing deployment is semantically aligned with real systems and lexical distractors describe toy, benchmark, or classroom contexts."
     },
     {
       "query_id": "q16-expanded-form",

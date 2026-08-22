@@ -199,33 +199,33 @@
     {
       "knowledge_ref": "vault://global/ranking/a-distractor",
       "knowledge_type": "guidance",
-      "title": "Shared ranking guidance",
-      "body": "rankingsharedomega has identical lexical evidence.",
-      "tags": ["ranking"],
+      "title": "Toy example ranking guidance",
+      "body": "rankingsharedomega is used for a toy example with invented inputs.",
+      "tags": ["ranking", "toy"],
       "status": "canonical"
     },
     {
       "knowledge_ref": "vault://global/ranking/b-distractor",
       "knowledge_type": "guidance",
-      "title": "Shared ranking guidance",
-      "body": "rankingsharedomega has identical lexical evidence.",
-      "tags": ["ranking"],
+      "title": "Benchmark fixture ranking guidance",
+      "body": "rankingsharedomega is used for a benchmark fixture with synthetic scores.",
+      "tags": ["ranking", "benchmark"],
       "status": "canonical"
     },
     {
       "knowledge_ref": "vault://global/ranking/c-distractor",
       "knowledge_type": "guidance",
-      "title": "Shared ranking guidance",
-      "body": "rankingsharedomega has identical lexical evidence.",
-      "tags": ["ranking"],
+      "title": "Classroom demo ranking guidance",
+      "body": "rankingsharedomega is used for a classroom demo with simplified behavior.",
+      "tags": ["ranking", "classroom"],
       "status": "canonical"
     },
     {
       "knowledge_ref": "vault://global/ranking/z-authoritative",
       "knowledge_type": "guidance",
-      "title": "Shared ranking guidance",
-      "body": "rankingsharedomega has identical lexical evidence.",
-      "tags": ["ranking"],
+      "title": "Live deployment ranking guidance",
+      "body": "rankingsharedomega governs live customer-facing deployments with operational traffic.",
+      "tags": ["ranking", "production"],
       "status": "canonical"
     }
   ]

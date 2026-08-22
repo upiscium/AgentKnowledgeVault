@@ -49,8 +49,8 @@ Failure lists are evaluation-only observations:
 | MRR | 0.769231 | 0.769231 | 0.788462 |
 | No-match accuracy | 0.875000 | 0.875000 | 0.875000 |
 | Mean selected count | 0.687500 | 1.187500 | 1.312500 |
-| Mean Capsule bytes/tokens | 624.187500 | 753.750000 | 772.750000 |
-| Max exact tokens | 830 | 1458 | 1603 |
+| Mean Capsule bytes/tokens | 625.500000 | 759.125000 | 839.625000 |
+| Max exact tokens | 830 | 1521 | 2664 |
 
 The small profile records one budget/evidence-cap failure for the multiple-relevant query. Normal and large remove that failure. Increasing the budget also increases selected distractors and caller-visible size; it does not repair lexical candidate misses or top-3 ranking quality.
 
@@ -64,7 +64,7 @@ Exact title, exact tag, technical identifier, body lexical, multi-term, common-n
 
 - **Synonym/paraphrase:** `q08` never generates the effect-time validation candidate.
 - **Abbreviation:** `q09` does not connect `TLS` with the expanded “Transport Layer Security” record.
-- **Ranking-sensitive:** `q15` generates the relevant ref but deterministic lexical ties put it fourth.
+- **Ranking-sensitive:** `q15` generates the relevant live-deployment ref, but three candidates with the same primary marker and additional lexical overlap rank above it. The query's “real systems” intent is semantically aligned with the target's “live customer-facing deployments” context and opposed to the distractors' toy, benchmark, and classroom contexts.
 - **Multiple relevant refs:** `q11` has only 0.5 Recall@1 and loses one relevant ref under the small evidence cap.
 
 The 0.875 no-match accuracy is driven by the synonym and abbreviation misses being reported as no evidence even though the golden set expects a relevant result.
@@ -84,6 +84,6 @@ Eligibility exclusions are expected policy behavior, not Level 1 recall defects.
 
 **C. hybrid** is the measured recommendation.
 
-Candidate expansion is needed for the synonym and abbreviation classes because no reranker can recover refs absent from the lexical candidate set. Reranking is independently needed for the ranking-sensitive case where the relevant ref is already present but below top 3. A candidate-expansion-only Level 1 would leave ordering weakness unchanged, while reranking-only would leave two unsupported semantic queries unchanged.
+Candidate expansion is needed for the synonym and abbreviation classes because no reranker can recover refs absent from the lexical candidate set. Reranking is independently needed for the ranking-sensitive case where the relevant ref is already present but below top 3 despite observable semantic alignment between the query's real-system intent and the target's live customer-facing deployment context. A candidate-expansion-only Level 1 would leave ordering weakness unchanged, while reranking-only would leave two unsupported semantic queries unchanged.
 
 This recommendation records the current weakness; it does not change Level 0 ranking, tokenization, FTS construction, eligibility, or Capsule assembly.

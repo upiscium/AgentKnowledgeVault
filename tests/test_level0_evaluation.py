@@ -98,6 +98,39 @@ def test_required_metrics_and_profiles_are_reported() -> None:
         assert current == query_ids
 
 
+def test_ranking_fixture_has_reranker_actionable_semantic_signal() -> None:
+    fixture = load(FIXTURE)
+    golden = load(QUERIES)
+    records = {item["knowledge_ref"]: item for item in fixture["records"]}
+    query = next(
+        item
+        for item in golden["queries"]
+        if item["query_id"] == "q15-ranking-sensitive"
+    )
+    ranking_refs = [
+        "vault://global/ranking/a-distractor",
+        "vault://global/ranking/b-distractor",
+        "vault://global/ranking/c-distractor",
+        "vault://global/ranking/z-authoritative",
+    ]
+    target_ref = query["expected_relevant_refs"][0]
+
+    assert query["request"]["query"] == "rankingsharedomega for real systems"
+    assert all("rankingsharedomega" in records[ref]["body"] for ref in ranking_refs)
+    assert "live customer-facing deployments" in records[target_ref]["body"]
+    assert {
+        context
+        for ref in ranking_refs[:-1]
+        for context in ("toy", "benchmark", "classroom")
+        if context in records[ref]["body"]
+    } == {"toy", "benchmark", "classroom"}
+
+    normal = load(BASELINE)["profiles"]["normal"]["per_query"]
+    result = next(item for item in normal if item["query_id"] == query["query_id"])
+    assert target_ref in result["lexical_candidate_refs"]
+    assert result["eligible_ranked_refs"].index(target_ref) >= 3
+
+
 def test_metric_primitives_use_known_ranked_selections() -> None:
     expected = {"relevant-a", "relevant-b"}
     selected = ["noise", "relevant-b", "other"]
