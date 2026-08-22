@@ -6,6 +6,10 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
 [dependency-groups]
 dev = [
   "jsonschema>=4.23.0",
@@ -17,3 +21,6 @@ dev = [
 
 [tool.mypy]
 exclude = [".direnv", ".venv"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentknowledgevault"]
