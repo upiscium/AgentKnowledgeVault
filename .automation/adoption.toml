@@ -1,0 +1,18 @@
+version = 1
+
+preserve_existing = [
+  "README.md",
+  ".envrc",
+  "pyproject.toml",
+  "uv.lock",
+  "flake.nix",
+  "flake.lock",
+  ".pre-commit-config.yaml",
+]
+
+[line_merge]
+".gitignore" = ["/.worktrees/"]
+
+[structured_merge]
+Justfile = "agent-module-router"
+"AGENTS.md" = "agent-rules-block"
