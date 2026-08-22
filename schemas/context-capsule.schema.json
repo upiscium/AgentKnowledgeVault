@@ -66,7 +66,8 @@
     "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
     "knowledge_uri": {
       "type": "string",
-      "pattern": "^vault://[A-Za-z0-9][A-Za-z0-9._-]{0,127}/[A-Za-z0-9][A-Za-z0-9._~!$&'()*+,;=:@%-]{0,511}$"
+      "maxLength": 2048,
+      "pattern": "^vault://(?:global/[A-Za-z0-9][A-Za-z0-9._~!$&'()*+,;=:@%-]{0,127}(?:/[A-Za-z0-9][A-Za-z0-9._~!$&'()*+,;=:@%-]{0,127})*|(?:project|research|private)/[A-Za-z0-9][A-Za-z0-9._-]{0,127}/[A-Za-z0-9][A-Za-z0-9._~!$&'()*+,;=:@%-]{0,127}(?:/[A-Za-z0-9][A-Za-z0-9._~!$&'()*+,;=:@%-]{0,127})*)$"
     },
     "reference_ids": {
       "type": "array",
@@ -195,8 +196,9 @@
       "additionalProperties": false,
       "required": [
         "requested_tokens",
+        "requested_bytes",
         "method",
-        "precision",
+        "guarantee",
         "used",
         "hard_limit",
         "limit_unit",
@@ -206,13 +208,14 @@
       ],
       "properties": {
         "requested_tokens": {"type": "integer", "minimum": 1, "maximum": 1000000},
+        "requested_bytes": {"type": "integer", "minimum": 1, "maximum": 1000000000},
         "method": {"enum": ["exact_tokenizer", "utf8_bytes"]},
-        "precision": {"enum": ["exact", "conservative"]},
+        "guarantee": {"enum": ["exact_tokens", "hard_bytes"]},
         "tokenizer_id": {"type": "string", "minLength": 1, "maxLength": 256},
-        "used": {"type": "integer", "minimum": 0},
-        "hard_limit": {"type": "integer", "minimum": 1},
+        "used": {"type": "integer", "minimum": 0, "maximum": 1000000000},
+        "hard_limit": {"type": "integer", "minimum": 1, "maximum": 1000000000},
         "limit_unit": {"enum": ["tokens", "utf8_bytes"]},
-        "serialized_bytes": {"type": "integer", "minimum": 0},
+        "serialized_bytes": {"type": "integer", "minimum": 0, "maximum": 1000000000},
         "evidence_items": {"type": "integer", "minimum": 0, "maximum": 1000},
         "outcome": {"enum": ["within_budget", "degraded", "failed"]}
       },
@@ -222,7 +225,7 @@
           "then": {
             "required": ["tokenizer_id"],
             "properties": {
-              "precision": {"const": "exact"},
+              "guarantee": {"const": "exact_tokens"},
               "limit_unit": {"const": "tokens"}
             }
           }
@@ -231,7 +234,7 @@
           "if": {"properties": {"method": {"const": "utf8_bytes"}}, "required": ["method"]},
           "then": {
             "properties": {
-              "precision": {"const": "conservative"},
+              "guarantee": {"const": "hard_bytes"},
               "limit_unit": {"const": "utf8_bytes"}
             },
             "not": {"required": ["tokenizer_id"]}

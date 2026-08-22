@@ -9,10 +9,10 @@ A Context Capsule is the primary Agent-facing, task-scoped retrieval artifact. I
 - `context`: compact task-ready synthesis.
 - `critical_facts`, `constraints`, `pitfalls`: typed claims. Every claim links to at least one logical knowledge reference or evidence item.
 - `unresolved`: explicit `unresolved`, `insufficient_evidence`, or `conflicting_evidence` outcomes. Absence of evidence is not silently filled.
-- `knowledge_refs`: logical `vault://` identities independent of storage.
+- `knowledge_refs`: nested logical `vault://global/...`, `vault://project/<project>/...`, `vault://research/<topic>/...`, or `vault://private/<scope>/...` identities independent of storage.
 - `evidence`: bounded excerpts plus provenance handles. Excerpts are capped at 512 Unicode code points and the array is capped by the request's `max_evidence_items` invariant.
 - `retrieval`: requested mode, highest level used, and an observable escalation record.
-- `budget`: requested boundary, accounting method/precision, measured usage, and outcome.
+- `budget`: requested token and byte boundaries, accounting method/guarantee, measured usage, and outcome.
 
 ## Traceability
 
@@ -25,11 +25,12 @@ Conflicting evidence is represented rather than flattened: a `conflicting_eviden
 JSON Schema validates each document's shape. Service and consumer validation must additionally enforce:
 
 1. `retrieval.mode` equals the request mode and the recorded path obeys that mode's escalation policy.
-2. `budget.requested_tokens` equals request `budget.max_tokens`.
-3. Exact accounting uses a named tokenizer and does not exceed the token limit.
-4. Fallback accounting uses the fixed `4 * requested_tokens` UTF-8 byte limit.
+2. `budget.requested_tokens` and `budget.requested_bytes` equal request `budget.max_tokens` and `budget.max_bytes`.
+3. Exact accounting uses a named tokenizer over the complete capsule payload excluding `budget` and does not exceed the token limit.
+4. Fallback accounting measures that same payload in UTF-8 bytes, does not exceed `max_bytes`, and makes no unknown-tokenizer token-count guarantee.
 5. Evidence count does not exceed request `max_evidence_items`.
 6. All claim/unresolved references resolve inside the capsule.
-7. `status: failed` has empty context and no claims/evidence; its unresolved list explains the failure.
+7. `status` and budget outcome agree: complete/within-budget, degraded/degraded, or failed/failed.
+8. `status: failed` has empty context and no claims/evidence; its unresolved list explains the failure.
 
 The validation tests exercise these invariants without implementing retrieval.

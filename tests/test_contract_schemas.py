@@ -24,14 +24,7 @@ CAPSULE_VALIDATOR = Draft202012Validator(CAPSULE_SCHEMA)
 
 
 def budgeted_projection(capsule: dict[str, Any]) -> bytes:
-    projection = {
-        "constraints": [item["statement"] for item in capsule["constraints"]],
-        "context": capsule["context"],
-        "critical_facts": [item["statement"] for item in capsule["critical_facts"]],
-        "evidence": [item["excerpt"] for item in capsule["evidence"]],
-        "pitfalls": [item["statement"] for item in capsule["pitfalls"]],
-        "unresolved": [item["question"] for item in capsule["unresolved"]],
-    }
+    projection = {key: value for key, value in capsule.items() if key != "budget"}
     return json.dumps(
         projection, ensure_ascii=False, separators=(",", ":"), sort_keys=True
     ).encode("utf-8")
@@ -48,9 +41,9 @@ def retrieval_request() -> dict[str, Any]:
             "languages": ["Python"],
             "topics": ["execution integrity"],
         },
-        "scope": ["global", "project:VillagerAgent"],
+        "scope": ["global", "project/villager-agent"],
         "mode": "auto",
-        "budget": {"max_tokens": 800, "max_evidence_items": 5},
+        "budget": {"max_tokens": 800, "max_bytes": 3200, "max_evidence_items": 5},
     }
 
 
@@ -75,7 +68,7 @@ def capsule() -> dict[str, Any]:
         "knowledge_refs": [
             {
                 "id": "knowledge-1",
-                "uri": "vault://global/effect-time-authority",
+                "uri": "vault://global/execution-integrity/effect-time-authority",
                 "revision": "v1",
             }
         ],
@@ -98,8 +91,9 @@ def capsule() -> dict[str, Any]:
         },
         "budget": {
             "requested_tokens": 800,
+            "requested_bytes": 3200,
             "method": "utf8_bytes",
-            "precision": "conservative",
+            "guarantee": "hard_bytes",
             "used": 0,
             "hard_limit": 3200,
             "limit_unit": "utf8_bytes",
@@ -132,14 +126,17 @@ def validate_contract_pair(
     budget = capsule["budget"]
     projection = budgeted_projection(capsule)
     assert budget["requested_tokens"] == retrieval_request["budget"]["max_tokens"]
+    assert budget["requested_bytes"] == retrieval_request["budget"]["max_bytes"]
     assert budget["used"] <= budget["hard_limit"]
     assert budget["serialized_bytes"] == len(projection)
     if budget["method"] == "exact_tokenizer":
+        assert budget["guarantee"] == "exact_tokens"
         assert budget["hard_limit"] == budget["requested_tokens"]
         if budget["tokenizer_id"] == "test:unicode-codepoint-v1":
             assert budget["used"] == len(projection.decode("utf-8"))
     else:
-        assert budget["hard_limit"] == 4 * budget["requested_tokens"]
+        assert budget["guarantee"] == "hard_bytes"
+        assert budget["hard_limit"] == budget["requested_bytes"]
         assert budget["used"] == budget["serialized_bytes"]
 
     assert budget["evidence_items"] == len(capsule["evidence"])
@@ -156,6 +153,13 @@ def validate_contract_pair(
         assert set(item["knowledge_refs"]) <= knowledge_ids
         assert set(item["evidence_refs"]) <= evidence_ids
 
+    expected_outcome = {
+        "complete": "within_budget",
+        "degraded": "degraded",
+        "failed": "failed",
+    }
+    assert budget["outcome"] == expected_outcome[capsule["status"]]
+
 
 def test_schemas_are_valid_draft_2020_12() -> None:
     Draft202012Validator.check_schema(REQUEST_SCHEMA)
@@ -170,7 +174,7 @@ def test_simple_query_does_not_require_task() -> None:
             "schema_version": "0.1",
             "query": "What constraints apply?",
             "mode": "fast",
-            "budget": {"max_tokens": 200, "max_evidence_items": 2},
+            "budget": {"max_tokens": 200, "max_bytes": 800, "max_evidence_items": 2},
         }
     )
 
@@ -181,6 +185,7 @@ def test_simple_query_does_not_require_task() -> None:
         lambda value: value.update({"mode": "unbounded"}),
         lambda value: value.update({"scope": ["sqlite:row:42"]}),
         lambda value: value["budget"].update({"max_tokens": 0}),
+        lambda value: value["budget"].update({"max_bytes": 0}),
         lambda value: value["budget"].update({"max_evidence_items": -1}),
         lambda value: value.update({"raw_top_k": 100}),
         lambda value: value.pop("budget"),
@@ -210,6 +215,36 @@ def test_storage_identity_cannot_replace_vault_uri(capsule: dict[str, Any]) -> N
     capsule["knowledge_refs"][0]["uri"] = "sqlite://knowledge/42"
     with pytest.raises(ValidationError):
         CAPSULE_VALIDATOR.validate(capsule)
+
+
+@pytest.mark.parametrize(
+    "uri",
+    [
+        "vault://global/agent-development/verify-before-pass",
+        "vault://project/terreate/buffer-write-contract",
+        "vault://research/execution-integrity/admission-effect-gap",
+        "vault://private/team-a/review-notes",
+    ],
+)
+def test_nested_vault_identities_are_valid(capsule: dict[str, Any], uri: str) -> None:
+    capsule["knowledge_refs"][0]["uri"] = uri
+    CAPSULE_VALIDATOR.validate(capsule)
+
+
+@pytest.mark.parametrize(
+    "scope",
+    [
+        ["global/agent-development"],
+        ["project/terreate"],
+        ["research/execution-integrity"],
+        ["private/team-a"],
+    ],
+)
+def test_scope_uses_the_namespace_grammar(
+    retrieval_request: dict[str, Any], scope: list[str]
+) -> None:
+    retrieval_request["scope"] = scope
+    REQUEST_VALIDATOR.validate(retrieval_request)
 
 
 def test_claim_requires_traceability(capsule: dict[str, Any]) -> None:
@@ -273,6 +308,27 @@ def test_fallback_usage_is_computed_from_budgeted_content(
         validate_contract_pair(retrieval_request, capsule)
 
 
+def test_large_caller_visible_metadata_counts_toward_hard_byte_boundary(
+    retrieval_request: dict[str, Any], capsule: dict[str, Any]
+) -> None:
+    capsule["evidence"][0]["provenance"]["handle"] = "p" * 2048
+    retrieval_request["budget"]["max_bytes"] = 2500
+    capsule["budget"]["requested_bytes"] = 2500
+    capsule["budget"]["hard_limit"] = 2500
+    CAPSULE_VALIDATOR.validate(capsule)
+    assert len(budgeted_projection(capsule)) > retrieval_request["budget"]["max_bytes"]
+    with pytest.raises(AssertionError):
+        validate_contract_pair(retrieval_request, capsule)
+
+
+def test_byte_fallback_makes_no_exact_token_guarantee(
+    retrieval_request: dict[str, Any], capsule: dict[str, Any]
+) -> None:
+    validate_contract_pair(retrieval_request, capsule)
+    assert capsule["budget"]["guarantee"] == "hard_bytes"
+    assert "tokenizer_id" not in capsule["budget"]
+
+
 def test_exact_test_tokenizer_usage_is_reproduced(
     retrieval_request: dict[str, Any], capsule: dict[str, Any]
 ) -> None:
@@ -280,7 +336,7 @@ def test_exact_test_tokenizer_usage_is_reproduced(
     capsule["budget"].update(
         {
             "method": "exact_tokenizer",
-            "precision": "exact",
+            "guarantee": "exact_tokens",
             "tokenizer_id": "test:unicode-codepoint-v1",
             "used": len(projection.decode("utf-8")),
             "hard_limit": retrieval_request["budget"]["max_tokens"],

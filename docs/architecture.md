@@ -17,7 +17,18 @@ The contracts intentionally do not select a persistence engine, index, embedding
 
 ## Stable public identities
 
-Knowledge uses the logical URI form `vault://<namespace>/<knowledge-id>`. It must not expose database row IDs, vector-store IDs, file offsets, or other physical keys. Evidence IDs are capsule-local handles that point to bounded excerpts and provenance; they do not replace the logical knowledge identity.
+Knowledge uses a logical URI with an explicit namespace and a nested knowledge path:
+
+```text
+vault://global/<knowledge-path>
+vault://project/<project>/<knowledge-path>
+vault://research/<topic>/<knowledge-path>
+vault://private/<scope>/<knowledge-path>
+```
+
+Examples include `vault://global/agent-development/verify-before-pass` and `vault://project/terreate/buffer-write-contract`. Each path segment is logical and stable; the URI must not expose database row IDs, vector-store IDs, file offsets, or other physical keys. Evidence IDs are capsule-local handles that point to bounded excerpts and provenance; they do not replace the logical knowledge identity.
+
+Retrieval scope selectors use the same namespace paths without the `vault://` prefix, for example `global`, `project/terreate`, `research/execution-integrity`, or `private/team-a`. A selector narrows requested retrieval and never grants access; authorization remains an independent boundary.
 
 ## Authority and OKF
 

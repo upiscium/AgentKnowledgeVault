@@ -10,13 +10,13 @@ The SSOT is [`schemas/retrieval-request.schema.json`](../schemas/retrieval-reque
 {
   "schema_version": "0.1",
   "query": "How must a pending action be revalidated?",
-  "scope": ["global", "project:Terreate"],
+  "scope": ["global", "project/terreate"],
   "mode": "auto",
-  "budget": {"max_tokens": 800, "max_evidence_items": 5}
+  "budget": {"max_tokens": 800, "max_bytes": 3200, "max_evidence_items": 5}
 }
 ```
 
-`scope` contains logical scopes only. Omitted scope means the service's documented caller-authorized default scope; it never grants additional authority.
+`scope` contains logical selectors derived from the `global`, `project`, `research`, and `private` namespace grammar. Nested selectors are allowed. Omitted scope means exactly `["global"]` in v0.1. A selector only narrows retrieval; it never grants authority or bypasses ACL decisions.
 
 ## Modes and escalation
 
@@ -28,13 +28,14 @@ Mode changes computation and escalation policy only. It never changes knowledge 
 
 ## Budget contract
 
-`max_tokens` is a hard boundary for budgeted capsule content, not a preference. `max_evidence_items` is also a hard maximum. Budgeted content is the canonical compact JSON projection of `context`, claim statements grouped as `critical_facts`, `constraints`, and `pitfalls`, unresolved questions, and evidence excerpts. The projection uses lexicographically sorted object keys, no insignificant whitespace, UTF-8 encoding, unescaped Unicode, and preserves array order. Envelope keys, identifiers, provenance handles, retrieval telemetry, and the budget report are excluded from that projection to avoid self-referential accounting, but remain structurally bounded by the schemas.
+The accounting payload is the entire caller-visible Context Capsule except the top-level `budget` report. It therefore includes schema/status fields, context, complete claims, IDs, `vault://` URIs and revisions, confidence, reference arrays, unresolved items, evidence and provenance, and retrieval telemetry. The payload uses lexicographically sorted object keys, no insignificant whitespace, UTF-8 encoding, unescaped Unicode, and preserves array order. Only `budget` is excluded to avoid self-reference; that report has a fixed field set, bounded strings, and bounded integers in the schema.
 
-1. When the requested/known tokenizer is available, the service uses exact token accounting. The returned accounting method is `exact_tokenizer`, precision is `exact`, and `used <= hard_limit == requested_tokens`.
-2. When no exact tokenizer is available, the deterministic hard fallback is UTF-8 bytes. The service sets `hard_limit = 4 * requested_tokens`, method `utf8_bytes`, precision `conservative`, and requires `used <= hard_limit`. The multiplier is fixed for v0.1 and is not a token estimate claim.
-3. A service must never return a successful capsule whose budgeted content exceeds the selected hard limit.
+1. `max_tokens` is a hard token boundary only when the service resolves and reports an exact tokenizer. The report uses `method: exact_tokenizer`, `guarantee: exact_tokens`, names `tokenizer_id`, and requires `used <= hard_limit == requested_tokens`.
+2. `max_bytes` is an independent hard fallback boundary. When no exact tokenizer is available, the report uses `method: utf8_bytes`, `guarantee: hard_bytes`, and requires `used == serialized_bytes <= hard_limit == requested_bytes`. This makes no claim that the resulting payload is at most `max_tokens` for an unknown tokenizer.
+3. `max_evidence_items` is an independent hard maximum.
+4. A service must never return a successful capsule whose complete accounting payload exceeds the selected hard boundary.
 
-If sufficient content cannot fit, the service first removes lower-value evidence excerpts and redundant prose while preserving claim-to-evidence handles. It then returns `status: degraded` with an `insufficient_evidence` or other unresolved item. If even a truthful bounded result cannot fit, it returns `status: failed` with empty context and a machine-readable budget report; it must not spill raw chunks.
+If sufficient content cannot fit, the service first removes lower-value evidence excerpts and redundant prose while preserving claim-to-evidence handles. It then returns `status: degraded` with an `insufficient_evidence` or other unresolved item. If even a truthful complete accounting payload cannot fit, it returns `status: failed` with empty context and a machine-readable budget report; it must not spill raw chunks. A caller that requires an exact token guarantee must treat a `hard_bytes` result as lacking that guarantee and may reject it.
 
 ## Raw retrieval
 

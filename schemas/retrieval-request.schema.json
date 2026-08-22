@@ -35,9 +35,10 @@
       "minItems": 1,
       "maxItems": 32,
       "uniqueItems": true,
+      "default": ["global"],
       "items": {
         "type": "string",
-        "pattern": "^(global|project:[A-Za-z0-9][A-Za-z0-9._-]{0,127})$"
+        "pattern": "^(global(?:/[A-Za-z0-9][A-Za-z0-9._-]{0,127})*|(?:project|research|private)/[A-Za-z0-9][A-Za-z0-9._-]{0,127}(?:/[A-Za-z0-9][A-Za-z0-9._-]{0,127})*)$"
       }
     },
     "mode": {"enum": ["fast", "auto", "thorough"]},
@@ -53,9 +54,10 @@
     "budget": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["max_tokens", "max_evidence_items"],
+      "required": ["max_tokens", "max_bytes", "max_evidence_items"],
       "properties": {
         "max_tokens": {"type": "integer", "minimum": 1, "maximum": 1000000},
+        "max_bytes": {"type": "integer", "minimum": 1, "maximum": 1000000000},
         "max_evidence_items": {"type": "integer", "minimum": 0, "maximum": 1000}
       }
     }
