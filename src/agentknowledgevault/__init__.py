@@ -14,6 +14,7 @@ from .vault import (
     VaultError,
     VaultRepository,
     VaultService,
+    VerificationOutcome,
 )
 
 __all__ = [
@@ -30,4 +31,5 @@ __all__ = [
     "VaultError",
     "VaultRepository",
     "VaultService",
+    "VerificationOutcome",
 ]

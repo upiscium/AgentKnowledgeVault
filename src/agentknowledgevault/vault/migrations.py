@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 
-CURRENT_SCHEMA_VERSION = 1
+CURRENT_SCHEMA_VERSION = 2
 
 
 @dataclass(frozen=True)
@@ -16,9 +16,13 @@ class Migration:
 
 
 _STATUS_VALUES = "'candidate','verified','canonical','deprecated','archived'"
-_EVENT_VALUES = (
+_EVENT_VALUES_V1 = (
     "'CREATED','UPDATED','VERIFIED','PROMOTED','SUPERSEDED','DEPRECATED',"
     "'ARCHIVED','REVALIDATION_REQUESTED'"
+)
+_EVENT_VALUES = (
+    "'CREATED','UPDATED','VERIFICATION_RECORDED','VERIFIED','PROMOTED',"
+    "'SUPERSEDED','DEPRECATED','ARCHIVED','REVALIDATION_REQUESTED'"
 )
 
 
@@ -60,7 +64,7 @@ MIGRATIONS = (
                 revision INTEGER NOT NULL CHECK (revision >= 1),
                 actor TEXT NOT NULL,
                 timestamp TEXT NOT NULL,
-                event_type TEXT NOT NULL CHECK (event_type IN ({_EVENT_VALUES})),
+                event_type TEXT NOT NULL CHECK (event_type IN ({_EVENT_VALUES_V1})),
                 metadata_json TEXT NOT NULL,
                 FOREIGN KEY (knowledge_ref) REFERENCES knowledge_records(knowledge_ref)
                     ON UPDATE RESTRICT ON DELETE RESTRICT
@@ -68,6 +72,74 @@ MIGRATIONS = (
             """,
             "CREATE INDEX knowledge_records_namespace_idx ON knowledge_records(namespace, knowledge_ref)",
             "CREATE INDEX knowledge_events_history_idx ON knowledge_events(knowledge_ref, event_sequence)",
+            """
+            CREATE TRIGGER knowledge_events_no_update
+            BEFORE UPDATE ON knowledge_events
+            BEGIN
+                SELECT RAISE(ABORT, 'knowledge_events is append-only');
+            END
+            """,
+            """
+            CREATE TRIGGER knowledge_events_no_delete
+            BEFORE DELETE ON knowledge_events
+            BEGIN
+                SELECT RAISE(ABORT, 'knowledge_events is append-only');
+            END
+            """,
+        ),
+    ),
+    Migration(
+        version=2,
+        name="append_only_and_verification_outcomes",
+        statements=(
+            """
+            ALTER TABLE knowledge_records
+            ADD COLUMN verification_outcome TEXT CHECK (
+                verification_outcome IN ('passed','failed','rejected')
+            )
+            """,
+            "DROP TRIGGER knowledge_events_no_update",
+            "DROP TRIGGER knowledge_events_no_delete",
+            "DROP INDEX knowledge_events_history_idx",
+            "ALTER TABLE knowledge_events RENAME TO knowledge_events_v1",
+            f"""
+            CREATE TABLE knowledge_events (
+                event_sequence INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_id TEXT NOT NULL UNIQUE,
+                knowledge_ref TEXT NOT NULL,
+                revision INTEGER NOT NULL CHECK (revision >= 1),
+                actor TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
+                event_type TEXT NOT NULL CHECK (event_type IN ({_EVENT_VALUES})),
+                metadata_json TEXT NOT NULL,
+                FOREIGN KEY (knowledge_ref) REFERENCES knowledge_records(knowledge_ref)
+                    ON UPDATE RESTRICT ON DELETE RESTRICT
+            )
+            """,
+            """
+            INSERT INTO knowledge_events(
+                event_sequence, event_id, knowledge_ref, revision, actor,
+                timestamp, event_type, metadata_json
+            )
+            SELECT event_sequence, event_id, knowledge_ref, revision, actor,
+                   timestamp, event_type, metadata_json
+            FROM knowledge_events_v1
+            ORDER BY event_sequence
+            """,
+            "DROP TABLE knowledge_events_v1",
+            "CREATE INDEX knowledge_events_history_idx ON knowledge_events(knowledge_ref, event_sequence)",
+            """
+            CREATE TRIGGER knowledge_events_no_replace
+            BEFORE INSERT ON knowledge_events
+            WHEN EXISTS (
+                SELECT 1 FROM knowledge_events
+                WHERE event_id = NEW.event_id
+                   OR event_sequence = NEW.event_sequence
+            )
+            BEGIN
+                SELECT RAISE(ABORT, 'knowledge_events is append-only');
+            END
+            """,
             """
             CREATE TRIGGER knowledge_events_no_update
             BEFORE UPDATE ON knowledge_events

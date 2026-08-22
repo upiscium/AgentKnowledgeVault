@@ -25,6 +25,7 @@ from .models import (
     KnowledgeEvent,
     KnowledgeRecord,
     KnowledgeStatus,
+    VerificationOutcome,
 )
 
 Clock = Callable[[], str]
@@ -42,8 +43,8 @@ def new_event_id() -> str:
 _RECORD_COLUMNS = """
 knowledge_ref, namespace, knowledge_path, knowledge_type, title, body, status,
 stability, tags_json, scope_json, applies_when_json, counterconditions_json,
-sources_json, provenance_json, generated_json, verification_json, stale_after,
-created_at, updated_at, revision
+sources_json, provenance_json, generated_json, verification_json,
+verification_outcome, stale_after, created_at, updated_at, revision
 """
 
 
@@ -130,7 +131,7 @@ class VaultRepository:
             connection.execute(
                 f"""
                 INSERT INTO knowledge_records({_RECORD_COLUMNS})
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     identity.knowledge_ref,
@@ -138,7 +139,9 @@ class VaultRepository:
                     identity.knowledge_path,
                     *values[:3],
                     KnowledgeStatus.CANDIDATE.value,
-                    *values[3:],
+                    *values[3:-1],
+                    None,
+                    values[-1],
                     timestamp,
                     timestamp,
                     1,
@@ -214,7 +217,8 @@ class VaultRepository:
                 SET knowledge_type = ?, title = ?, body = ?, stability = ?, tags_json = ?,
                     scope_json = ?, applies_when_json = ?, counterconditions_json = ?,
                     sources_json = ?, provenance_json = ?, generated_json = ?,
-                    verification_json = ?, stale_after = ?, updated_at = ?, revision = ?
+                    verification_json = ?, verification_outcome = NULL,
+                    stale_after = ?, updated_at = ?, revision = ?
                 WHERE knowledge_ref = ? AND revision = ? AND status = 'candidate'
                 """,
                 (
@@ -244,6 +248,7 @@ class VaultRepository:
         *,
         expected_revision: int,
         actor: str,
+        outcome: VerificationOutcome,
         verification: JsonValue,
         event_metadata: JsonValue = None,
     ) -> KnowledgeRecord:
@@ -262,12 +267,13 @@ class VaultRepository:
             cursor = connection.execute(
                 """
                 UPDATE knowledge_records
-                SET status = ?, verification_json = ?, updated_at = ?, revision = ?
-                WHERE knowledge_ref = ? AND revision = ?
+                SET verification_json = ?, verification_outcome = ?,
+                    updated_at = ?, revision = ?
+                WHERE knowledge_ref = ? AND revision = ? AND status = 'candidate'
                 """,
                 (
-                    KnowledgeStatus.VERIFIED.value,
                     canonical_json(verification_value),
+                    outcome.value,
                     timestamp,
                     new_revision,
                     knowledge_ref,
@@ -276,17 +282,18 @@ class VaultRepository:
             )
             if cursor.rowcount != 1:
                 raise StaleRevisionError(knowledge_ref)
-            metadata = (
-                event_metadata
-                if event_metadata is not None
-                else {"verification": verification_value}
-            )
+            metadata: dict[str, JsonValue] = {
+                "outcome": outcome.value,
+                "verification": verification_value,
+            }
+            if event_metadata is not None:
+                metadata["metadata"] = require_json(event_metadata)
             self._append_event(
                 connection,
                 knowledge_ref=knowledge_ref,
                 revision=new_revision,
                 actor=actor,
-                event_type=EventType.VERIFIED,
+                event_type=EventType.VERIFICATION_RECORDED,
                 metadata=metadata,
                 timestamp=timestamp,
             )
@@ -308,6 +315,14 @@ class VaultRepository:
                 connection, knowledge_ref, expected_revision
             )
             source = KnowledgeStatus(current["status"])
+            if (
+                source is KnowledgeStatus.CANDIDATE
+                and target is KnowledgeStatus.VERIFIED
+                and current["verification_outcome"] != VerificationOutcome.PASSED.value
+            ):
+                raise InvalidLifecycleTransitionError(
+                    "verified status requires a recorded passed verification"
+                )
             event_type = self._transition_event(source, target)
             new_revision = expected_revision + 1
             cursor = connection.execute(
@@ -399,7 +414,11 @@ class VaultRepository:
         self, connection: sqlite3.Connection, knowledge_ref: str, expected_revision: int
     ) -> sqlite3.Row:
         row = connection.execute(
-            "SELECT status, revision FROM knowledge_records WHERE knowledge_ref = ?",
+            """
+            SELECT status, revision, verification_outcome
+            FROM knowledge_records
+            WHERE knowledge_ref = ?
+            """,
             (knowledge_ref,),
         ).fetchone()
         if row is None:
@@ -474,6 +493,7 @@ class VaultRepository:
     ) -> EventType:
         policy = {
             (KnowledgeStatus.CANDIDATE, KnowledgeStatus.ARCHIVED): EventType.ARCHIVED,
+            (KnowledgeStatus.CANDIDATE, KnowledgeStatus.VERIFIED): EventType.VERIFIED,
             (KnowledgeStatus.VERIFIED, KnowledgeStatus.CANONICAL): EventType.PROMOTED,
             (KnowledgeStatus.VERIFIED, KnowledgeStatus.ARCHIVED): EventType.ARCHIVED,
             (
@@ -513,6 +533,11 @@ class VaultRepository:
             provenance=parse_json(row["provenance_json"]),
             generated=parse_json(row["generated_json"]),
             verification=parse_json(row["verification_json"]),
+            verification_outcome=(
+                VerificationOutcome(row["verification_outcome"])
+                if row["verification_outcome"] is not None
+                else None
+            ),
             stale_after=row["stale_after"],
             created_at=row["created_at"],
             updated_at=row["updated_at"],

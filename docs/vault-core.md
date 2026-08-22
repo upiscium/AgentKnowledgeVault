@@ -39,15 +39,18 @@ The normal path is:
 
 ```text
 create_candidate -> candidate
-record_verification -> verified
+record_verification(passed|failed|rejected) -> candidate
+candidate + recorded passed verification -> verified
 verified -> canonical -> deprecated -> archived
 ```
+
+Recording verification evidence and granting verified trust are separate mutations. `record_verification` requires a typed `VerificationOutcome`, stores the evidence and outcome, increments revision, and emits `VERIFICATION_RECORDED` without changing candidate status. Only a recorded `passed` outcome permits the explicit candidate-to-verified transition, which emits `VERIFIED`. Failed or rejected outcomes remain candidates and cannot enter verified state; they may be revised, reverified, or explicitly archived. Updating candidate content clears any previously recorded outcome so stale verification cannot authorize promotion.
 
 Direct candidate-to-canonical promotion is invalid. `create_candidate` has no status argument. Explicit early discard from `candidate` or `verified` to `archived` is allowed and emits `ARCHIVED`; this policy is tested. `SUPERSEDED` and `REVALIDATION_REQUESTED` are events, not statuses.
 
 ## Append-only event history
 
-The event table stores `event_id`, logical `knowledge_ref`, state `revision`, actor, UTC timestamp, event type, and canonical JSON metadata. Service/repository APIs expose append and list operations only. SQLite `BEFORE UPDATE` and `BEFORE DELETE` triggers abort attempts to mutate existing events, including direct SQL access.
+The event table stores `event_id`, logical `knowledge_ref`, state `revision`, actor, UTC timestamp, event type, and canonical JSON metadata. Service/repository APIs expose append and list operations only. SQLite `BEFORE UPDATE` and `BEFORE DELETE` triggers abort attempts to mutate existing events. A `BEFORE INSERT` collision trigger also rejects an existing `event_id` or `event_sequence`, so `INSERT OR REPLACE` cannot bypass append-only history even when a direct SQLite connection does not enable recursive triggers. Fresh, non-colliding events remain appendable.
 
 ## OKF preservation boundary
 

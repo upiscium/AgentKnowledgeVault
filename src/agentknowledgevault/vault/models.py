@@ -16,9 +16,16 @@ class KnowledgeStatus(StrEnum):
     ARCHIVED = "archived"
 
 
+class VerificationOutcome(StrEnum):
+    PASSED = "passed"
+    FAILED = "failed"
+    REJECTED = "rejected"
+
+
 class EventType(StrEnum):
     CREATED = "CREATED"
     UPDATED = "UPDATED"
+    VERIFICATION_RECORDED = "VERIFICATION_RECORDED"
     VERIFIED = "VERIFIED"
     PROMOTED = "PROMOTED"
     SUPERSEDED = "SUPERSEDED"
@@ -63,6 +70,7 @@ class KnowledgeRecord:
     provenance: JsonValue
     generated: JsonValue
     verification: JsonValue
+    verification_outcome: VerificationOutcome | None
     stale_after: str | None
     created_at: str
     updated_at: str

@@ -14,6 +14,7 @@ from .models import (
     KnowledgeEvent,
     KnowledgeRecord,
     KnowledgeStatus,
+    VerificationOutcome,
 )
 from .repository import VaultRepository
 from .service import VaultService
@@ -32,4 +33,5 @@ __all__ = [
     "VaultError",
     "VaultRepository",
     "VaultService",
+    "VerificationOutcome",
 ]

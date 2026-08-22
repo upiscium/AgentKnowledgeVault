@@ -11,6 +11,7 @@ from .models import (
     KnowledgeEvent,
     KnowledgeRecord,
     KnowledgeStatus,
+    VerificationOutcome,
 )
 from .repository import VaultRepository
 
@@ -64,6 +65,7 @@ class VaultService:
         *,
         expected_revision: int,
         actor: str,
+        outcome: VerificationOutcome,
         verification: JsonValue,
         metadata: JsonValue = None,
     ) -> KnowledgeRecord:
@@ -71,6 +73,7 @@ class VaultService:
             knowledge_ref,
             expected_revision=expected_revision,
             actor=actor,
+            outcome=outcome,
             verification=verification,
             event_metadata=metadata,
         )

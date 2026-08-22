@@ -17,6 +17,7 @@ from agentknowledgevault import (
     StaleRevisionError,
     VaultRepository,
     VaultService,
+    VerificationOutcome,
 )
 from agentknowledgevault.vault.config import default_database_path
 from agentknowledgevault.vault.migrations import CURRENT_SCHEMA_VERSION
@@ -169,15 +170,23 @@ def test_verification_and_forward_lifecycle(
         draft.knowledge_ref,
         expected_revision=record.revision,
         actor="reviewer",
+        outcome=VerificationOutcome.PASSED,
         verification={"method": "review", "result": "pass", "checks": ["source"]},
     )
-    assert record.status is KnowledgeStatus.VERIFIED
+    assert record.status is KnowledgeStatus.CANDIDATE
+    assert record.verification_outcome is VerificationOutcome.PASSED
     assert record.verification == {
         "checks": ["source"],
         "method": "review",
         "result": "pass",
     }
 
+    record = repository.transition_lifecycle(
+        draft.knowledge_ref,
+        KnowledgeStatus.VERIFIED,
+        expected_revision=record.revision,
+        actor="reviewer",
+    )
     record = repository.transition_lifecycle(
         draft.knowledge_ref,
         KnowledgeStatus.CANONICAL,
@@ -198,16 +207,119 @@ def test_verification_and_forward_lifecycle(
     )
 
     assert record.status is KnowledgeStatus.ARCHIVED
-    assert record.revision == 5
+    assert record.revision == 6
     assert [
         event.event_type for event in repository.list_events(draft.knowledge_ref)
     ] == [
         EventType.CREATED,
+        EventType.VERIFICATION_RECORDED,
         EventType.VERIFIED,
         EventType.PROMOTED,
         EventType.DEPRECATED,
         EventType.ARCHIVED,
     ]
+
+
+@pytest.mark.parametrize(
+    "outcome", [VerificationOutcome.FAILED, VerificationOutcome.REJECTED]
+)
+def test_failed_or_rejected_verification_never_grants_verified_status(
+    repository: VaultRepository,
+    draft: KnowledgeDraft,
+    outcome: VerificationOutcome,
+) -> None:
+    created = repository.create_candidate(draft, actor="writer")
+    recorded = repository.record_verification(
+        draft.knowledge_ref,
+        expected_revision=created.revision,
+        actor="reviewer",
+        outcome=outcome,
+        verification={"reason": "checks did not pass"},
+    )
+
+    assert recorded.status is KnowledgeStatus.CANDIDATE
+    assert recorded.revision == created.revision + 1
+    assert recorded.verification_outcome is outcome
+    assert [
+        event.event_type for event in repository.list_events(draft.knowledge_ref)
+    ] == [
+        EventType.CREATED,
+        EventType.VERIFICATION_RECORDED,
+    ]
+    before_events = repository.list_events(draft.knowledge_ref)
+
+    with pytest.raises(InvalidLifecycleTransitionError, match="passed verification"):
+        repository.transition_lifecycle(
+            draft.knowledge_ref,
+            KnowledgeStatus.VERIFIED,
+            expected_revision=recorded.revision,
+            actor="reviewer",
+        )
+
+    assert repository.get_knowledge(draft.knowledge_ref) == recorded
+    assert repository.list_events(draft.knowledge_ref) == before_events
+
+
+def test_failed_verification_event_failure_rolls_back_state_and_revision(
+    repository: VaultRepository, draft: KnowledgeDraft
+) -> None:
+    created = repository.create_candidate(draft, actor="writer")
+    connection = sqlite3.connect(repository.database_path)
+    try:
+        connection.execute(
+            """
+            CREATE TRIGGER test_reject_verification_event
+            BEFORE INSERT ON knowledge_events
+            WHEN NEW.event_type = 'VERIFICATION_RECORDED'
+            BEGIN
+                SELECT RAISE(ABORT, 'injected verification event failure');
+            END
+            """
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    with pytest.raises(sqlite3.IntegrityError, match="verification event failure"):
+        repository.record_verification(
+            draft.knowledge_ref,
+            expected_revision=created.revision,
+            actor="reviewer",
+            outcome=VerificationOutcome.FAILED,
+            verification={"reason": "failed"},
+        )
+
+    assert repository.get_knowledge(draft.knowledge_ref) == created
+    assert [
+        event.event_type for event in repository.list_events(draft.knowledge_ref)
+    ] == [EventType.CREATED]
+
+
+def test_candidate_update_clears_a_previous_passed_verification(
+    repository: VaultRepository, draft: KnowledgeDraft
+) -> None:
+    created = repository.create_candidate(draft, actor="writer")
+    recorded = repository.record_verification(
+        draft.knowledge_ref,
+        expected_revision=created.revision,
+        actor="reviewer",
+        outcome=VerificationOutcome.PASSED,
+        verification={"checks": ["source"]},
+    )
+    updated = repository.update_candidate(
+        replace(draft, body="Changed after verification"),
+        expected_revision=recorded.revision,
+        actor="writer",
+    )
+
+    assert updated.verification_outcome is None
+    with pytest.raises(InvalidLifecycleTransitionError, match="passed verification"):
+        repository.transition_lifecycle(
+            draft.knowledge_ref,
+            KnowledgeStatus.VERIFIED,
+            expected_revision=updated.revision,
+            actor="reviewer",
+        )
 
 
 @pytest.mark.parametrize(
@@ -222,7 +334,14 @@ def test_explicit_early_discard_policy(
             draft.knowledge_ref,
             expected_revision=record.revision,
             actor="reviewer",
-            verification={"result": "discard"},
+            outcome=VerificationOutcome.PASSED,
+            verification={"result": "pass"},
+        )
+        record = repository.transition_lifecycle(
+            draft.knowledge_ref,
+            KnowledgeStatus.VERIFIED,
+            expected_revision=record.revision,
+            actor="reviewer",
         )
     archived = repository.transition_lifecycle(
         draft.knowledge_ref,
@@ -245,7 +364,14 @@ def test_update_after_verification_is_rejected(
         draft.knowledge_ref,
         expected_revision=record.revision,
         actor="reviewer",
+        outcome=VerificationOutcome.PASSED,
         verification={"result": "pass"},
+    )
+    record = repository.transition_lifecycle(
+        draft.knowledge_ref,
+        KnowledgeStatus.VERIFIED,
+        expected_revision=record.revision,
+        actor="reviewer",
     )
     with pytest.raises(InvalidLifecycleTransitionError):
         repository.update_candidate(
@@ -292,13 +418,66 @@ def test_event_log_is_append_only_at_database_level(
     repository.create_candidate(draft, actor="writer")
     connection = sqlite3.connect(repository.database_path)
     try:
+        connection.execute("PRAGMA recursive_triggers = OFF")
+        original = connection.execute("SELECT * FROM knowledge_events").fetchone()
+        assert original is not None
         with pytest.raises(sqlite3.IntegrityError, match="append-only"):
             connection.execute("UPDATE knowledge_events SET actor = 'tampered'")
+        connection.rollback()
         with pytest.raises(sqlite3.IntegrityError, match="append-only"):
             connection.execute("DELETE FROM knowledge_events")
+        connection.rollback()
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO knowledge_events(
+                    event_id, knowledge_ref, revision, actor, timestamp,
+                    event_type, metadata_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    original[1],
+                    original[2],
+                    original[3],
+                    "tampered",
+                    original[5],
+                    original[6],
+                    original[7],
+                ),
+            )
+        connection.rollback()
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO knowledge_events(
+                    event_sequence, event_id, knowledge_ref, revision, actor,
+                    timestamp, event_type, metadata_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    original[0],
+                    "replacement-event",
+                    original[2],
+                    original[3],
+                    "tampered",
+                    original[5],
+                    original[6],
+                    original[7],
+                ),
+            )
+        connection.rollback()
+        assert (
+            connection.execute("SELECT * FROM knowledge_events").fetchone() == original
+        )
     finally:
         connection.close()
-    assert len(repository.list_events(draft.knowledge_ref)) == 1
+    repository.record_signal_event(
+        draft.knowledge_ref,
+        EventType.REVALIDATION_REQUESTED,
+        expected_revision=1,
+        actor="reviewer",
+    )
+    assert len(repository.list_events(draft.knowledge_ref)) == 2
 
 
 def test_event_failure_rolls_back_state_update(
@@ -370,7 +549,7 @@ def test_reopen_preserves_state_and_history(
 def test_schema_version_and_initialization_are_deterministic(
     repository: VaultRepository,
 ) -> None:
-    assert repository.current_schema_version() == CURRENT_SCHEMA_VERSION == 1
+    assert repository.current_schema_version() == CURRENT_SCHEMA_VERSION == 2
     VaultRepository(repository.database_path)
     connection = sqlite3.connect(repository.database_path)
     try:
@@ -379,7 +558,10 @@ def test_schema_version_and_initialization_are_deterministic(
         ).fetchall()
     finally:
         connection.close()
-    assert rows == [(1, "vault_core_v0_1")]
+    assert rows == [
+        (1, "vault_core_v0_1"),
+        (2, "append_only_and_verification_outcomes"),
+    ]
 
 
 @pytest.mark.parametrize(
