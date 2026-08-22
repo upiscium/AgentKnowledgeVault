@@ -37,6 +37,7 @@ class RetrievalDiagnostics:
     selected_count: int
     excluded_scope_count: int
     excluded_lifecycle_count: int
+    excluded_applicability_count: int
     excluded_stale_count: int
     malformed_freshness_count: int
     index_rebuilt: bool

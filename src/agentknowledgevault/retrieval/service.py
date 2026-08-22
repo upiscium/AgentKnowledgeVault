@@ -69,7 +69,7 @@ class Level0RetrievalService:
             return self._result(
                 capsule=None,
                 error=accountant.budget_too_small_error(minimum_measurement),
-                counts=(0, 0, 0, 0, 0, 0),
+                counts=(0, 0, 0, 0, 0, 0, 0),
                 index_rebuilt=False,
                 watermark="not-synchronized",
                 serialized_bytes=0,
@@ -101,10 +101,11 @@ class Level0RetrievalService:
 
     def _eligible_records(
         self, records: list[KnowledgeRecord], request: RetrievalRequest
-    ) -> tuple[list[KnowledgeRecord], tuple[int, int, int, int, int]]:
+    ) -> tuple[list[KnowledgeRecord], tuple[int, int, int, int, int, int]]:
         eligible: list[KnowledgeRecord] = []
         excluded_scope = 0
         excluded_lifecycle = 0
+        excluded_applicability = 0
         excluded_stale = 0
         malformed_freshness = 0
         now = self._clock()
@@ -124,11 +125,15 @@ class Level0RetrievalService:
                 excluded_stale += 1
                 malformed_freshness += freshness == "malformed"
                 continue
+            if self._has_unevaluated_conditions(record):
+                excluded_applicability += 1
+                continue
             eligible.append(record)
         return eligible, (
             len(records),
             excluded_scope,
             excluded_lifecycle,
+            excluded_applicability,
             excluded_stale,
             malformed_freshness,
         )
@@ -190,11 +195,27 @@ class Level0RetrievalService:
         candidates = [by_ref[item.knowledge_ref] for item in ranked[:cap]]
         omitted_by_cap = len(ranked) > len(candidates)
 
+        if not ranked:
+            payload = self._failed_payload(
+                request,
+                question="no eligible canonical Level 0 evidence matched the request",
+                terminal_reason="insufficient_evidence",
+            )
+            capsule, measurement = accountant.finalize(payload, outcome="failed")
+            if measurement.fits:
+                return capsule, measurement, 0
+            minimum = accountant.minimum_failed_payload()
+            capsule, measurement = accountant.finalize(minimum, outcome="failed")
+            return capsule, measurement, 0
+
         if not candidates:
             payload = self._failed_payload(
                 request,
-                question="no canonical Level 0 evidence matched the request",
-                terminal_reason="insufficient_evidence",
+                question=(
+                    "matching canonical evidence could not be included because "
+                    "max_evidence_items is zero"
+                ),
+                terminal_reason="budget_limited",
             )
             capsule, measurement = accountant.finalize(payload, outcome="failed")
             if measurement.fits:
@@ -310,7 +331,7 @@ class Level0RetrievalService:
         *,
         capsule: dict[str, Any] | None,
         error: dict[str, Any] | None,
-        counts: tuple[int, int, int, int, int, int],
+        counts: tuple[int, int, int, int, int, int, int],
         index_rebuilt: bool,
         watermark: str,
         serialized_bytes: int,
@@ -322,8 +343,9 @@ class Level0RetrievalService:
             selected_count=counts[1],
             excluded_scope_count=counts[2],
             excluded_lifecycle_count=counts[3],
-            excluded_stale_count=counts[4],
-            malformed_freshness_count=counts[5],
+            excluded_applicability_count=counts[4],
+            excluded_stale_count=counts[5],
+            malformed_freshness_count=counts[6],
             index_rebuilt=index_rebuilt,
             index_watermark=watermark,
             serialized_bytes=serialized_bytes,
@@ -354,6 +376,20 @@ class Level0RetrievalService:
             return "stale" if parsed.astimezone(UTC) <= now else "fresh"
         except (TypeError, ValueError, OverflowError):
             return "malformed"
+
+    @staticmethod
+    def _has_unevaluated_conditions(record: KnowledgeRecord) -> bool:
+        applies_when_empty = (
+            record.applies_when is None
+            or record.applies_when == {}
+            or record.applies_when == []
+        )
+        counterconditions_empty = (
+            record.counterconditions is None
+            or record.counterconditions == {}
+            or record.counterconditions == []
+        )
+        return not applies_when_empty or not counterconditions_empty
 
     @staticmethod
     def _excerpt(body: str, title: str, query: str, limit: int = 320) -> str:
@@ -387,13 +423,13 @@ class Level0RetrievalService:
                 continue
             source_type = candidate.get("source_type", candidate.get("kind", "other"))
             handle = candidate.get("handle", candidate.get("uri"))
-            if isinstance(handle, str) and handle:
+            if isinstance(handle, str) and 1 <= len(handle) <= 2048:
                 return {
                     "source_type": (
                         source_type
                         if isinstance(source_type, str) and source_type in allowed
                         else "other"
                     ),
-                    "handle": handle[:2048],
+                    "handle": handle,
                 }
         return {"source_type": "other", "handle": record.knowledge_ref}

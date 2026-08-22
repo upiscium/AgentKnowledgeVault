@@ -23,7 +23,7 @@ Scope selectors match the `vault://` URI with the scheme removed. A selector mat
 
 `stale_after = null` remains eligible on freshness grounds. A timezone-aware timestamp at or before the injected clock is stale. An absent timezone, invalid timestamp, or otherwise unparseable value is excluded without aborting retrieval and increments malformed-freshness diagnostics.
 
-Vault Core does not define machine-evaluable `applies_when` or `counterconditions` predicates. Level 0 therefore does not infer their meaning or use unknown JSON shapes as semantic filters or generated claims.
+Vault Core does not define machine-evaluable `applies_when` or `counterconditions` predicates. Level 0 therefore does not infer their meaning. A canonical record with either field set to anything other than the defined empty values (`null`, `{}`, or `[]`) is fail-closed excluded and counted by internal applicability diagnostics. It is never returned as if it were unconditional, and arbitrary JSON is never converted into a guessed predicate or generated claim.
 
 ## Derived lexical index
 
@@ -37,9 +37,9 @@ FTS5 `bm25` supplies lexical relevance with internal field weights. Exact normal
 
 ## Capsule assembly and budgets
 
-Level 0 emits bounded source excerpts, never an unbounded body top-k dump. Each evidence item points to a capsule-local knowledge handle whose entry contains the logical `vault://` URI and Vault revision. Provenance is copied only from an explicit source/handle shape; otherwise the logical URI is used as an opaque fallback handle. Level 0 does not invent critical facts, constraints, or pitfalls, so those arrays remain empty unless a future deterministic structured rule is separately specified.
+Level 0 emits bounded source excerpts, never an unbounded body top-k dump. Each evidence item points to a capsule-local knowledge handle whose entry contains the logical `vault://` URI and Vault revision. Provenance is copied only from an explicit source/handle shape that already fits the schema. Oversize opaque handles are skipped rather than truncated; if no valid source handle remains, the complete logical `vault://` URI is used as the traceable fallback. Level 0 does not invent critical facts, constraints, or pitfalls, so those arrays remain empty unless a future deterministic structured rule is separately specified.
 
-Evidence is considered in deterministic rank order and capped by `max_evidence_items`. On overflow, lower-ranked evidence is removed and the Capsule becomes `degraded` with an explicit `insufficient_evidence` marker. No match returns a failed Capsule with empty synthesized content and explicit insufficient evidence.
+Evidence is considered in deterministic rank order and capped by `max_evidence_items`. On overflow, lower-ranked evidence is removed and the Capsule becomes `degraded` with an explicit `insufficient_evidence` marker. No match returns a failed Capsule with empty synthesized content and explicit insufficient evidence. A matching result with `max_evidence_items = 0` is distinct: it returns a budget-limited failed Capsule that explicitly reports evidence-cap exhaustion and does not claim that retrieval found no match.
 
 Budget accounting serializes the entire caller-visible Capsule except top-level `budget` using sorted keys, compact separators, UTF-8, and unescaped Unicode:
 
@@ -50,4 +50,4 @@ Budget accounting serializes the entire caller-visible Capsule except top-level 
 
 ## Diagnostics and baseline
 
-`RetrievalResult` keeps diagnostics outside the strict Capsule: candidate and selected counts, scope/lifecycle/stale exclusions, malformed freshness, index rebuild state and watermark, serialized Capsule bytes, and elapsed milliseconds. Tests use an injected monotonic clock to make the measurement surface reproducible. The fixture baseline verifies one selected result from one candidate, exact serialized-byte accounting, stable ranking before and after rebuild, and measurable latency without introducing a benchmark framework or making production performance claims.
+`RetrievalResult` keeps diagnostics outside the strict Capsule: candidate and selected counts, scope/lifecycle/applicability/stale exclusions, malformed freshness, index rebuild state and watermark, serialized Capsule bytes, and elapsed milliseconds. Tests use an injected monotonic clock to make the measurement surface reproducible. The fixture baseline verifies one selected result from one candidate, exact serialized-byte accounting, stable ranking before and after rebuild, and measurable latency without introducing a benchmark framework or making production performance claims.

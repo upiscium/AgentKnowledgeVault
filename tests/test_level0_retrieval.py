@@ -536,6 +536,31 @@ def test_evidence_item_hard_cap_is_enforced(
     assert_capsule(result.capsule, request_value)
 
 
+def test_zero_evidence_cap_reports_cap_exhaustion_not_no_match(
+    repository: VaultRepository, service: Level0RetrievalService
+) -> None:
+    store(
+        repository,
+        draft(
+            "vault://global/cap/zero",
+            title="Zero evidence cap",
+            body="zero-cap-marker",
+        ),
+    )
+    request_value = request("zero-cap-marker", max_evidence_items=0)
+
+    result = service.retrieve(request_value)
+
+    assert result.capsule is not None
+    assert result.capsule["status"] == "failed"
+    assert result.capsule["retrieval"]["terminal_reason"] == "budget_limited"
+    question = result.capsule["unresolved"][0]["question"]
+    assert "max_evidence_items is zero" in question
+    assert "no eligible" not in question
+    assert result.diagnostics.selected_count == 0
+    assert_capsule(result.capsule, request_value)
+
+
 def test_hard_byte_budget_accounts_for_large_provenance(
     repository: VaultRepository, service: Level0RetrievalService
 ) -> None:
@@ -561,6 +586,31 @@ def test_hard_byte_budget_accounts_for_large_provenance(
     assert bounded.capsule is not None
     assert bounded.capsule["status"] == "failed"
     assert_capsule(bounded.capsule, bounded_request)
+
+
+def test_oversize_opaque_provenance_falls_back_without_truncation(
+    repository: VaultRepository, service: Level0RetrievalService
+) -> None:
+    oversized = "opaque://" + ("x" * 3000)
+    record = store(
+        repository,
+        draft(
+            "vault://global/provenance/oversized",
+            title="Oversized provenance",
+            body="oversized-provenance-marker",
+            sources=[],
+            provenance={"source_type": "repository", "handle": oversized},
+        ),
+    )
+    request_value = request("oversized-provenance-marker")
+
+    result = service.retrieve(request_value)
+
+    assert result.capsule is not None
+    returned = result.capsule["evidence"][0]["provenance"]
+    assert returned == {"source_type": "other", "handle": record.knowledge_ref}
+    assert returned["handle"] != oversized[:2048]
+    assert_capsule(result.capsule, request_value)
 
 
 def test_hard_byte_overflow_drops_lower_ranked_evidence_with_marker(
@@ -855,7 +905,7 @@ def test_no_match_is_truthful_failed_capsule(
     assert_capsule(result.capsule, request_value)
 
 
-def test_undefined_conditions_are_not_semantically_interpreted(
+def test_undefined_conditions_fail_closed_without_semantic_interpretation(
     repository: VaultRepository, service: Level0RetrievalService
 ) -> None:
     record = store(
@@ -872,10 +922,12 @@ def test_undefined_conditions_are_not_semantically_interpreted(
     result = service.retrieve(request("opaque-condition-marker"))
 
     assert result.capsule is not None
-    assert selected_uris(result.capsule) == [record.knowledge_ref]
+    assert result.capsule["status"] == "failed"
+    assert selected_uris(result.capsule) == []
     assert result.capsule["critical_facts"] == []
     assert result.capsule["constraints"] == []
     assert result.capsule["pitfalls"] == []
+    assert result.diagnostics.excluded_applicability_count == 1
     assert repository.get_knowledge(record.knowledge_ref) == record
 
 
@@ -901,6 +953,7 @@ def test_diagnostics_are_separate_from_strict_capsule_and_measure_baseline(
         "selected_count",
         "excluded_scope_count",
         "excluded_lifecycle_count",
+        "excluded_applicability_count",
         "excluded_stale_count",
         "malformed_freshness_count",
         "index_rebuilt",
