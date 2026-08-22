@@ -19,8 +19,10 @@ def load_schema(name: str) -> dict[str, Any]:
 
 REQUEST_SCHEMA = load_schema("retrieval-request.schema.json")
 CAPSULE_SCHEMA = load_schema("context-capsule.schema.json")
+ERROR_SCHEMA = load_schema("retrieval-error.schema.json")
 REQUEST_VALIDATOR = Draft202012Validator(REQUEST_SCHEMA)
 CAPSULE_VALIDATOR = Draft202012Validator(CAPSULE_SCHEMA)
+ERROR_VALIDATOR = Draft202012Validator(ERROR_SCHEMA)
 
 
 def budgeted_projection(capsule: dict[str, Any]) -> bytes:
@@ -28,6 +30,85 @@ def budgeted_projection(capsule: dict[str, Any]) -> bytes:
     return json.dumps(
         projection, ensure_ascii=False, separators=(",", ":"), sort_keys=True
     ).encode("utf-8")
+
+
+def minimum_failed_capsule(retrieval_request: dict[str, Any]) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "schema_version": "0.1",
+        "status": "failed",
+        "context": "",
+        "critical_facts": [],
+        "constraints": [],
+        "pitfalls": [],
+        "unresolved": [
+            {
+                "id": "budget",
+                "kind": "insufficient_evidence",
+                "question": "insufficient budget for context capsule",
+                "knowledge_refs": [],
+                "evidence_refs": [],
+            }
+        ],
+        "knowledge_refs": [],
+        "evidence": [],
+        "retrieval": {
+            "mode": retrieval_request["mode"],
+            "level": 0,
+            "path": [0],
+            "terminal_reason": "budget_limited",
+        },
+        "budget": {
+            "requested_tokens": retrieval_request["budget"]["max_tokens"],
+            "requested_bytes": retrieval_request["budget"]["max_bytes"],
+            "method": "utf8_bytes",
+            "guarantee": "hard_bytes",
+            "used": 0,
+            "hard_limit": retrieval_request["budget"]["max_bytes"],
+            "limit_unit": "utf8_bytes",
+            "serialized_bytes": 0,
+            "evidence_items": 0,
+            "outcome": "failed",
+        },
+    }
+    projection = budgeted_projection(result)
+    result["budget"]["serialized_bytes"] = len(projection)
+    tokenizer = retrieval_request.get("tokenizer")
+    if tokenizer and tokenizer["id"] == "test:unicode-codepoint-v1":
+        result["budget"].update(
+            {
+                "method": "exact_tokenizer",
+                "guarantee": "exact_tokens",
+                "tokenizer_id": tokenizer["id"],
+                "used": len(projection.decode("utf-8")),
+                "hard_limit": retrieval_request["budget"]["max_tokens"],
+                "limit_unit": "tokens",
+            }
+        )
+    else:
+        result["budget"]["used"] = len(projection)
+    return result
+
+
+def budget_too_small_error(capsule: dict[str, Any]) -> dict[str, Any]:
+    budget = capsule["budget"]
+    return {
+        "schema_version": "0.1",
+        "error": {
+            "code": "budget_too_small_for_capsule",
+            "message": "The selected hard boundary cannot contain a Context Capsule.",
+        },
+        "accounting": {
+            "method": budget["method"],
+            "unit": budget["limit_unit"],
+            "requested": budget["hard_limit"],
+            "minimum_required": budget["used"],
+            **(
+                {"tokenizer_id": budget["tokenizer_id"]}
+                if "tokenizer_id" in budget
+                else {}
+            ),
+        },
+    }
 
 
 @pytest.fixture
@@ -164,8 +245,10 @@ def validate_contract_pair(
 def test_schemas_are_valid_draft_2020_12() -> None:
     Draft202012Validator.check_schema(REQUEST_SCHEMA)
     Draft202012Validator.check_schema(CAPSULE_SCHEMA)
+    Draft202012Validator.check_schema(ERROR_SCHEMA)
     assert REQUEST_SCHEMA["$id"].endswith("/v0.1/retrieval-request.schema.json")
     assert CAPSULE_SCHEMA["$id"].endswith("/v0.1/context-capsule.schema.json")
+    assert ERROR_SCHEMA["$id"].endswith("/v0.1/retrieval-error.schema.json")
 
 
 def test_simple_query_does_not_require_task() -> None:
@@ -345,6 +428,42 @@ def test_exact_test_tokenizer_usage_is_reproduced(
         }
     )
     validate_contract_pair(retrieval_request, capsule)
+
+
+def test_minimum_failed_capsule_may_sit_exactly_on_byte_boundary(
+    retrieval_request: dict[str, Any],
+) -> None:
+    candidate = minimum_failed_capsule(retrieval_request)
+    minimum = candidate["budget"]["used"]
+    retrieval_request["budget"]["max_bytes"] = minimum
+    candidate = minimum_failed_capsule(retrieval_request)
+    validate_contract_pair(retrieval_request, candidate)
+    assert candidate["budget"]["used"] == candidate["budget"]["hard_limit"]
+
+
+def test_too_small_byte_budget_returns_protocol_error_not_capsule(
+    retrieval_request: dict[str, Any],
+) -> None:
+    candidate = minimum_failed_capsule(retrieval_request)
+    retrieval_request["budget"]["max_bytes"] = candidate["budget"]["used"] - 1
+    impossible = minimum_failed_capsule(retrieval_request)
+    with pytest.raises(AssertionError):
+        validate_contract_pair(retrieval_request, impossible)
+    error = budget_too_small_error(impossible)
+    ERROR_VALIDATOR.validate(error)
+    assert error["error"]["code"] == "budget_too_small_for_capsule"
+
+
+def test_too_small_exact_token_budget_returns_protocol_error(
+    retrieval_request: dict[str, Any],
+) -> None:
+    retrieval_request["tokenizer"] = {"id": "test:unicode-codepoint-v1"}
+    candidate = minimum_failed_capsule(retrieval_request)
+    retrieval_request["budget"]["max_tokens"] = candidate["budget"]["used"] - 1
+    impossible = minimum_failed_capsule(retrieval_request)
+    with pytest.raises(AssertionError):
+        validate_contract_pair(retrieval_request, impossible)
+    ERROR_VALIDATOR.validate(budget_too_small_error(impossible))
 
 
 def test_failed_capsule_has_no_synthesized_payload(capsule: dict[str, Any]) -> None:

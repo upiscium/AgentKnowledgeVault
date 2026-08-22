@@ -32,5 +32,6 @@ JSON Schema validates each document's shape. Service and consumer validation mus
 6. All claim/unresolved references resolve inside the capsule.
 7. `status` and budget outcome agree: complete/within-budget, degraded/degraded, or failed/failed.
 8. `status: failed` has empty context and no claims/evidence; its unresolved list explains the failure.
+9. If even the minimum failed capsule cannot fit, no capsule is generated; retrieval returns the bounded `budget_too_small_for_capsule` protocol error instead.
 
 The validation tests exercise these invariants without implementing retrieval.

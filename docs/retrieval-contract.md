@@ -37,6 +37,40 @@ The accounting payload is the entire caller-visible Context Capsule except the t
 
 If sufficient content cannot fit, the service first removes lower-value evidence excerpts and redundant prose while preserving claim-to-evidence handles. It then returns `status: degraded` with an `insufficient_evidence` or other unresolved item. If even a truthful complete accounting payload cannot fit, it returns `status: failed` with empty context and a machine-readable budget report; it must not spill raw chunks. A caller that requires an exact token guarantee must treat a `hard_bytes` result as lacking that guarantee and may reject it.
 
+## Preflight rejection boundary
+
+Complete, degraded, and failed Context Capsules all obey the selected hard boundary. Before retrieval, the service constructs the canonical minimum failed-capsule accounting payload below, substituting the requested mode. Its `budget` report is excluded under the normal accounting rule.
+
+```json
+{
+  "schema_version": "0.1",
+  "status": "failed",
+  "context": "",
+  "critical_facts": [],
+  "constraints": [],
+  "pitfalls": [],
+  "unresolved": [{
+    "id": "budget",
+    "kind": "insufficient_evidence",
+    "question": "insufficient budget for context capsule",
+    "knowledge_refs": [],
+    "evidence_refs": []
+  }],
+  "knowledge_refs": [],
+  "evidence": [],
+  "retrieval": {
+    "mode": "<requested mode>",
+    "level": 0,
+    "path": [0],
+    "terminal_reason": "budget_limited"
+  }
+}
+```
+
+If that payload exceeds `max_tokens` under the exact tokenizer or exceeds `max_bytes` under byte fallback, no Context Capsule can truthfully satisfy the request.
+
+In that case the service must not overflow the boundary, return a schema-invalid capsule, or recursively shrink a capsule. It rejects the retrieval request outside the Context Capsule contract with `budget_too_small_for_capsule`. The bounded, transport-independent error shape is defined by [`schemas/retrieval-error.schema.json`](../schemas/retrieval-error.schema.json); HTTP status codes or other transport mappings remain outside v0.1. The protocol error reports the selected method, requested limit, and measured minimum required limit. It is not a Context Capsule and is not charged to the rejected capsule budget.
+
 ## Raw retrieval
 
 A future raw API may support debug/evaluation/admin workflows, but it is not this request's primary response and must have independent authorization and limits. Unknown response fields such as `chunks` or `raw_results` are rejected by the Context Capsule schema.

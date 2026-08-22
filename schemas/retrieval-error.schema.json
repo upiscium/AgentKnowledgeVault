@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentknowledgevault.dev/schemas/v0.1/retrieval-error.schema.json",
+  "title": "Retrieval Protocol Error v0.1",
+  "description": "A bounded protocol error returned instead of a Context Capsule when the request cannot represent one within its selected hard boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "error", "accounting"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {"const": "budget_too_small_for_capsule"},
+        "message": {"type": "string", "minLength": 1, "maxLength": 256}
+      }
+    },
+    "accounting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "unit", "requested", "minimum_required"],
+      "properties": {
+        "method": {"enum": ["exact_tokenizer", "utf8_bytes"]},
+        "unit": {"enum": ["tokens", "utf8_bytes"]},
+        "requested": {"type": "integer", "minimum": 1, "maximum": 1000000000},
+        "minimum_required": {"type": "integer", "minimum": 1, "maximum": 1000000000},
+        "tokenizer_id": {"type": "string", "minLength": 1, "maxLength": 256}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"method": {"const": "exact_tokenizer"}}, "required": ["method"]},
+          "then": {
+            "required": ["tokenizer_id"],
+            "properties": {"unit": {"const": "tokens"}}
+          }
+        },
+        {
+          "if": {"properties": {"method": {"const": "utf8_bytes"}}, "required": ["method"]},
+          "then": {
+            "properties": {"unit": {"const": "utf8_bytes"}},
+            "not": {"required": ["tokenizer_id"]}
+          }
+        }
+      ]
+    }
+  }
+}

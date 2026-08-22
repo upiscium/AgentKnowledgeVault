@@ -4,7 +4,7 @@ AgentKnowledgeVault returns the smallest sufficient task context within an expli
 
 ## Contract-first boundary
 
-The versioned JSON Schemas in [`schemas/`](../schemas/) are the single source of truth (SSOT) for the v0.1 wire contracts. Documentation explains their semantics but must not redefine fields. There are no Python wire models in v0.1.
+The versioned JSON Schemas in [`schemas/`](../schemas/) are the single source of truth (SSOT) for the v0.1 request, capsule, and bounded protocol-error wire contracts. Documentation explains their semantics but must not redefine fields. There are no Python wire models in v0.1.
 
 ```text
 Retrieval Request
