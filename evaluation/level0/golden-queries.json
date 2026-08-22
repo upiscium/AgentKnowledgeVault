@@ -1,0 +1,138 @@
+{
+  "dataset_version": "level0-golden-v1",
+  "queries": [
+    {
+      "query_id": "q01-exact-title",
+      "query_class": "exact_title",
+      "request": {"schema_version": "0.1", "query": "Atomic write protocol", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://global/transactions/atomic-write"],
+      "expected_no_match": false,
+      "notes": "Exact normalized title should be a strong Level 0 case."
+    },
+    {
+      "query_id": "q02-exact-tag",
+      "query_class": "exact_tag",
+      "request": {"schema_version": "0.1", "query": "fts5", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://global/storage/derived-lexical-index"],
+      "expected_no_match": false,
+      "notes": "Exact tag retrieval."
+    },
+    {
+      "query_id": "q03-technical-identifier",
+      "query_class": "technical_identifier",
+      "request": {"schema_version": "0.1", "query": "BUF_COMMIT_V2", "scope": ["project/terreate"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://project/terreate/buffer-write-contract"],
+      "expected_no_match": false,
+      "notes": "Exact public synthetic symbol in body text."
+    },
+    {
+      "query_id": "q04-body-lexical",
+      "query_class": "body_lexical",
+      "request": {"schema_version": "0.1", "query": "revalidate authorization", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://global/execution/effect-time-validation"],
+      "expected_no_match": false,
+      "notes": "Two body terms should retrieve the authority guidance."
+    },
+    {
+      "query_id": "q05-multi-term",
+      "query_class": "multi_term",
+      "request": {"schema_version": "0.1", "query": "append only event history", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://global/events/append-only-history"],
+      "expected_no_match": false,
+      "notes": "Multi-term lexical overlap across title and tags."
+    },
+    {
+      "query_id": "q06-project-scope",
+      "query_class": "global_project_scope",
+      "request": {"schema_version": "0.1", "query": "scope-shared-marker", "scope": ["project/terreate"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://project/terreate/scope-shared"],
+      "expected_irrelevant_refs": ["vault://global/scope/shared-operation", "vault://project/terreatex/scope-lookalike"],
+      "expected_no_match": false,
+      "notes": "Project selector must not include global or lookalike owner paths."
+    },
+    {
+      "query_id": "q07-near-lookalike",
+      "query_class": "near_lookalike",
+      "request": {"schema_version": "0.1", "query": "lookalikeboundaryomega", "scope": ["project/terreate"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": [],
+      "expected_ineligible_refs": ["vault://project/terreatex/scope-lookalike"],
+      "expected_no_match": true,
+      "notes": "Lexical candidate exists only under a segment-boundary lookalike scope."
+    },
+    {
+      "query_id": "q08-synonym-paraphrase",
+      "query_class": "synonym_paraphrase",
+      "request": {"schema_version": "0.1", "query": "permission check at action moment", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://global/execution/effect-time-validation"],
+      "expected_no_match": false,
+      "notes": "Semantic paraphrase deliberately has no strong lexical overlap."
+    },
+    {
+      "query_id": "q09-abbreviation",
+      "query_class": "abbreviation_expanded_form",
+      "request": {"schema_version": "0.1", "query": "TLS", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://global/network/transport-layer-security"],
+      "expected_no_match": false,
+      "notes": "Acronym is absent from the expanded-form Knowledge."
+    },
+    {
+      "query_id": "q10-common-noise",
+      "query_class": "common_noise_query",
+      "request": {"schema_version": "0.1", "query": "how do we use database write lock safely", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://global/storage/database-write-lock"],
+      "expected_no_match": false,
+      "notes": "Common noise terms accompany a specific lexical target."
+    },
+    {
+      "query_id": "q11-multiple-relevant",
+      "query_class": "multiple_relevant_refs",
+      "request": {"schema_version": "0.1", "query": "cache invalidation", "scope": ["global", "project/terreate"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://global/cache/invalidation", "vault://project/terreate/cache-invalidation"],
+      "expected_no_match": false,
+      "notes": "Budget profiles should reveal evidence-cap effects over two relevant refs."
+    },
+    {
+      "query_id": "q12-distractor-heavy",
+      "query_class": "distractor_heavy",
+      "request": {"schema_version": "0.1", "query": "trace_id request", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://global/observability/request-correlation"],
+      "expected_irrelevant_refs": ["vault://global/http/request-routing", "vault://global/http/request-validation", "vault://global/http/request-retry"],
+      "expected_no_match": false,
+      "notes": "Several request-related lexical distractors compete with a technical identifier."
+    },
+    {
+      "query_id": "q13-no-match",
+      "query_class": "no_match",
+      "request": {"schema_version": "0.1", "query": "quantum zebra nebula", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": [],
+      "expected_no_match": true,
+      "notes": "No fixture Knowledge contains these terms."
+    },
+    {
+      "query_id": "q14-eligibility-distractors",
+      "query_class": "stale_noncanonical_conditional_distractor",
+      "request": {"schema_version": "0.1", "query": "legacyrotationomega", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": [],
+      "expected_ineligible_refs": ["vault://global/eligibility/stale", "vault://global/eligibility/candidate", "vault://global/eligibility/verified", "vault://global/eligibility/deprecated", "vault://global/eligibility/conditional"],
+      "expected_no_match": true,
+      "notes": "All lexical candidates are intentionally excluded by policy gates."
+    },
+    {
+      "query_id": "q15-ranking-sensitive",
+      "query_class": "ranking_sensitive",
+      "request": {"schema_version": "0.1", "query": "rankingsharedomega for real systems", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://global/ranking/z-authoritative"],
+      "expected_irrelevant_refs": ["vault://global/ranking/a-distractor", "vault://global/ranking/b-distractor", "vault://global/ranking/c-distractor"],
+      "expected_no_match": false,
+      "notes": "All candidates share the marker, while the relevant live customer-facing deployment is semantically aligned with real systems and lexical distractors describe toy, benchmark, or classroom contexts."
+    },
+    {
+      "query_id": "q16-expanded-form",
+      "query_class": "expanded_form",
+      "request": {"schema_version": "0.1", "query": "Transport Layer Security configuration", "scope": ["global"], "mode": "fast", "budget": {"max_tokens": 1800, "max_bytes": 7200, "max_evidence_items": 3}, "tokenizer": {"id": "test:unicode-codepoint-v1"}},
+      "expected_relevant_refs": ["vault://global/network/transport-layer-security"],
+      "expected_no_match": false,
+      "notes": "Expanded form is the lexical counterpart to the abbreviation failure."
+    }
+  ]
+}
