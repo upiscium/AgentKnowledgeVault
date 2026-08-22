@@ -1,5 +1,12 @@
 """AgentKnowledgeVault public Python package."""
 
+from .retrieval import (
+    ExactTokenCounter,
+    Level0RetrievalService,
+    RetrievalDiagnostics,
+    RetrievalResult,
+    accounting_payload,
+)
 from .vault import (
     EventType,
     InvalidKnowledgeIdentityError,
@@ -19,6 +26,7 @@ from .vault import (
 
 __all__ = [
     "EventType",
+    "ExactTokenCounter",
     "InvalidKnowledgeIdentityError",
     "InvalidLifecycleTransitionError",
     "InvalidMetadataError",
@@ -27,9 +35,13 @@ __all__ = [
     "KnowledgeNotFoundError",
     "KnowledgeRecord",
     "KnowledgeStatus",
+    "Level0RetrievalService",
+    "RetrievalDiagnostics",
+    "RetrievalResult",
     "StaleRevisionError",
     "VaultError",
     "VaultRepository",
     "VaultService",
     "VerificationOutcome",
+    "accounting_payload",
 ]
