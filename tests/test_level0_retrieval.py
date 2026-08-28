@@ -19,6 +19,8 @@ from agentknowledgevault import (
     VerificationOutcome,
     accounting_payload,
 )
+from agentknowledgevault.retrieval import RetrievalEligibility
+from agentknowledgevault.retrieval.request import parse_retrieval_request
 
 ROOT = Path(__file__).parents[1]
 CAPSULE_VALIDATOR = Draft202012Validator(
@@ -263,6 +265,55 @@ def test_default_trust_eligibility_is_canonical_only(
         records[KnowledgeStatus.CANONICAL].knowledge_ref
     ]
     assert result.diagnostics.excluded_lifecycle_count == 4
+
+
+def test_extracted_eligibility_policy_matches_level0_filter(
+    repository: VaultRepository, service: Level0RetrievalService
+) -> None:
+    records = [
+        store(
+            repository,
+            draft(
+                "vault://global/policy/accepted",
+                title="Accepted",
+                body="policy equivalence marker",
+            ),
+        ),
+        store(
+            repository,
+            draft(
+                "vault://global/policy/malformed",
+                title="Malformed",
+                body="policy equivalence marker",
+                stale_after="invalid",
+            ),
+        ),
+        store(
+            repository,
+            draft(
+                "vault://global/policy/conditional",
+                title="Conditional",
+                body="policy equivalence marker",
+                applies_when={"environment": "prod"},
+            ),
+        ),
+    ]
+    parsed = service.retrieve(request("policy equivalence marker"))
+    eligibility = RetrievalEligibility()
+    direct_records, direct_counts = eligibility.filter(records, ("global",), NOW)
+    filtered_records, filtered_counts = service._eligible_records(
+        records, parse_retrieval_request(request("policy equivalence marker"))
+    )
+
+    assert parsed.diagnostics.excluded_stale_count == direct_counts.excluded_stale
+    assert [item.knowledge_ref for item in direct_records] == [
+        item.knowledge_ref for item in filtered_records
+    ]
+    assert direct_counts == type(direct_counts)(3, 0, 0, 1, 1, 1)
+    assert filtered_counts == (3, 0, 0, 1, 1, 1)
+    assert eligibility.evaluate(records[1], ("global",), NOW).exclusion_reason == (
+        "malformed_freshness"
+    )
 
 
 def test_passed_verification_without_canonical_status_is_excluded(

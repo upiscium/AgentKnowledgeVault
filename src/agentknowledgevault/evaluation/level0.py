@@ -531,7 +531,14 @@ def _canonical_sha256(value: JsonObject) -> str:
 def _implementation_sha256() -> str:
     retrieval_dir = Path(__file__).parents[1] / "retrieval"
     digest = hashlib.sha256()
-    for name in ("budget.py", "index.py", "models.py", "request.py", "service.py"):
+    for name in (
+        "budget.py",
+        "eligibility.py",
+        "index.py",
+        "models.py",
+        "request.py",
+        "service.py",
+    ):
         digest.update(name.encode("utf-8"))
         digest.update(b"\0")
         digest.update((retrieval_dir / name).read_bytes())

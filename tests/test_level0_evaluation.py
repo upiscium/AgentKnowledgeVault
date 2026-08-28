@@ -62,13 +62,33 @@ def test_report_generation_is_deterministic_and_matches_snapshot(
     first = generate_level0_report(FIXTURE, QUERIES, PROFILES, tmp_path / "first")
     second = generate_level0_report(FIXTURE, QUERIES, PROFILES, tmp_path / "second")
 
-    assert first == second == load(BASELINE)
+    baseline = load(BASELINE)
+    assert first == second
+
+    # The snapshot is the historical Issue #6 artifact.  A refactor may
+    # legitimately change implementation provenance without changing any
+    # evaluation behavior or report content.
+    current = dict(first)
+    current.pop("implementation_sha256")
+    expected = dict(baseline)
+    expected.pop("implementation_sha256")
+    assert current == expected
     assert "latency" not in json.dumps(first).casefold()
     assert "elapsed" not in json.dumps(first).casefold()
 
     output = tmp_path / "report.json"
     write_report(first, output)
-    assert output.read_text(encoding="utf-8") == BASELINE.read_text(encoding="utf-8")
+    written = load(output)
+    written.pop("implementation_sha256")
+    assert written == expected
+
+
+def test_level0_baseline_file_bytes_are_stable_during_evaluation(
+    tmp_path: Path,
+) -> None:
+    before = BASELINE.read_bytes()
+    generate_level0_report(FIXTURE, QUERIES, PROFILES, tmp_path / "workspace")
+    assert BASELINE.read_bytes() == before
 
 
 def test_required_metrics_and_profiles_are_reported() -> None:
