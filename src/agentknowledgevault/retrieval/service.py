@@ -9,10 +9,16 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from agentknowledgevault.vault.models import KnowledgeRecord, KnowledgeStatus
+from agentknowledgevault.vault.models import KnowledgeRecord
 from agentknowledgevault.vault.repository import VaultRepository
 
 from .budget import BudgetAccountant, ExactTokenCounter
+from .eligibility import (
+    RetrievalEligibility,
+    has_unevaluated_conditions,
+    record_freshness,
+    scope_specificity,
+)
 from .index import DerivedLexicalIndex, normalized_terms
 from .models import (
     RankedKnowledge,
@@ -51,6 +57,7 @@ class Level0RetrievalService:
         self.repository = repository
         self.index = DerivedLexicalIndex(derived_path)
         self._clock = clock
+        self._eligibility = RetrievalEligibility()
         self._token_counters = dict(token_counters or {})
         self._monotonic = monotonic
 
@@ -102,40 +109,16 @@ class Level0RetrievalService:
     def _eligible_records(
         self, records: list[KnowledgeRecord], request: RetrievalRequest
     ) -> tuple[list[KnowledgeRecord], tuple[int, int, int, int, int, int]]:
-        eligible: list[KnowledgeRecord] = []
-        excluded_scope = 0
-        excluded_lifecycle = 0
-        excluded_applicability = 0
-        excluded_stale = 0
-        malformed_freshness = 0
-        now = self._clock()
-        if now.tzinfo is None:
-            raise ValueError("retrieval clock must return a timezone-aware datetime")
-        now = now.astimezone(UTC)
-
-        for record in records:
-            if self._scope_specificity(record.knowledge_ref, request.scope) < 0:
-                excluded_scope += 1
-                continue
-            if record.status is not KnowledgeStatus.CANONICAL:
-                excluded_lifecycle += 1
-                continue
-            freshness = self._freshness(record.stale_after, now)
-            if freshness != "fresh":
-                excluded_stale += 1
-                malformed_freshness += freshness == "malformed"
-                continue
-            if self._has_unevaluated_conditions(record):
-                excluded_applicability += 1
-                continue
-            eligible.append(record)
+        eligible, counts = self._eligibility.filter(
+            records, request.scope, self._clock()
+        )
         return eligible, (
-            len(records),
-            excluded_scope,
-            excluded_lifecycle,
-            excluded_applicability,
-            excluded_stale,
-            malformed_freshness,
+            counts.candidate_count,
+            counts.excluded_scope,
+            counts.excluded_lifecycle,
+            counts.excluded_applicability,
+            counts.excluded_stale,
+            counts.malformed_freshness,
         )
 
     def _rank(
@@ -355,41 +338,15 @@ class Level0RetrievalService:
 
     @staticmethod
     def _scope_specificity(knowledge_ref: str, selectors: tuple[str, ...]) -> int:
-        logical_path = knowledge_ref.removeprefix("vault://")
-        matches = [
-            len(selector.split("/"))
-            for selector in selectors
-            if logical_path == selector or logical_path.startswith(f"{selector}/")
-        ]
-        return max(matches, default=-1)
+        return scope_specificity(knowledge_ref, selectors)
 
     @staticmethod
     def _freshness(stale_after: str | None, now: datetime) -> str:
-        if stale_after is None:
-            return "fresh"
-        try:
-            if not isinstance(stale_after, str):
-                return "malformed"
-            parsed = datetime.fromisoformat(stale_after)
-            if parsed.tzinfo is None:
-                return "malformed"
-            return "stale" if parsed.astimezone(UTC) <= now else "fresh"
-        except (TypeError, ValueError, OverflowError):
-            return "malformed"
+        return record_freshness(stale_after, now)
 
     @staticmethod
     def _has_unevaluated_conditions(record: KnowledgeRecord) -> bool:
-        applies_when_empty = (
-            record.applies_when is None
-            or record.applies_when == {}
-            or record.applies_when == []
-        )
-        counterconditions_empty = (
-            record.counterconditions is None
-            or record.counterconditions == {}
-            or record.counterconditions == []
-        )
-        return not applies_when_empty or not counterconditions_empty
+        return has_unevaluated_conditions(record)
 
     @staticmethod
     def _excerpt(body: str, title: str, query: str, limit: int = 320) -> str:
