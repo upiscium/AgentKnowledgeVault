@@ -51,6 +51,19 @@ integration-pending -> PR merge -> guarded finalize -> merged
   -> approval-gated cleanup -> dependency re-evaluation -> next Task
 ```
 
+For a merged Task, cleanup reconstructs safety from the unique same-repository
+merged PR: its branch and `headRefOid` must match the registered clean local
+Task branch exactly, and the local branch must contain no later commit. A live
+origin Task branch must have that same OID. A deleted origin branch is accepted
+only after those merged-PR checks, which allows a finalized Task such as
+AgentKnowledgeVault #12 to retry normal cleanup without recreating a remote
+branch. Cancelled Tasks retain the conservative unpublished-commit check and
+never use the merged-PR exception. Cleanup records a private administrative
+receipt before worktree removal and deletes the local branch with an
+expected-head compare-and-swap, so a partial failure remains retryable.
+Cleanup remains Main-owned and approval-gated; no raw cleanup authority is
+added.
+
 `agent::task-start` uses the same guarded default-branch synchronization at
 execution time before creating a branch/worktree, so it does not trust a stale
 remote-tracking ref even if the default branch advanced after finalization.
@@ -59,14 +72,18 @@ remote-tracking ref even if the default branch advanced after finalization.
 
 An Agent Core upgrade is permitted only from a dedicated registered, non-default
 Automation Maintenance Task. From that Task worktree, use a trusted local
-Templates checkout as the source:
+Templates checkout and the exact full immutable source revision:
 
 ```sh
-AUTOMATION_MAINTENANCE=1 just automation::upgrade <trusted local Templates checkout>
+AUTOMATION_MAINTENANCE=1 just automation::upgrade <trusted local Templates checkout> <expected-revision>
 ```
 
 The source must be a trusted clean Git worktree root with a full, non-null
-`HEAD`. Both `automation::check-update` and `automation::upgrade` reject
+`HEAD`. `automation::check-update <source> [expected-revision]` optionally
+asserts the expected revision and always reports actual `HEAD`; upgrade and
+`automation::bootstrap-receipt` require it. An exact actual-HEAD mismatch
+fails before tracked consumer mutation or receipt/authority publication, even
+for byte-identical trees: commit identity is provenance. Both operations reject
 tracked modifications and non-ignored untracked paths under
 `components/agent-core`; ignored generated artifacts are structurally absent.
 They pin the source `HEAD`, materialize only tracked Agent Core objects into a
@@ -85,29 +102,61 @@ Before publication, execute `git diff --check`, `just agent::doctor`,
 just automation::commit <task> [message]
 just agent::push <task>
 just agent::pr-create <task>
+just agent::pr-prepare <task>
+just agent::pr-edit <task>
+just agent::pr-ready <task>
 ```
+
+`pr-prepare` renders acceptance criteria as authoritative requirements and
+renders non-empty `Current state` Blockers/Unverified values in the PR risk
+section. Missing Current-state evidence, unresolved placeholders, stale
+verification, missing completed reviewer evidence, an incomplete declared
+security review, or contradictory validation claims block publication.
 
 The normal upgrade flow creates its receipt before verification. If a self-hosted
 pre-receipt upgrade leaves the exact upgraded diff without that receipt, perform
-normal verification and, before `automation::commit`, run the canonical recovery
-bridge:
+normal verification and, before `automation::commit`, run the strict bootstrap
+bridge with its expected revision:
 
 ```sh
-AUTOMATION_MAINTENANCE=1 just automation::bootstrap-receipt <trusted clean Git Templates checkout>
+AUTOMATION_MAINTENANCE=1 just automation::bootstrap-receipt <trusted clean Git Templates checkout> <expected-revision>
 ```
 
-The bridge supports exactly two strict cases: canonical pre-receipt
-reconstruction, and recovery of an exact active receipt whose authority is
-missing. It does not trust `NO_CHANGES`, the current diff, or the environment.
-It uses the same pinned clean-source and tracked Agent Core snapshot semantics as
-the normal update operations, reruns pinned clean-source canonical
-reconstruction, and requires Task/branch/worktree/`HEAD`, the pinned source
-revision, and exact pending safe paths/content/modes and fingerprints. Recovery
-additionally requires receipt exact equality and that it is unchanged, then
-issues only the missing authority. A receipt with authority, or stale, forged,
-or tampered state, fails closed. Product, Adapter, repository, secret-pattern,
-or `.task-state` paths also fail closed. Continue with the existing
-`automation::commit` flow; ordinary `agent::commit` rejection remains unchanged.
+The bootstrap bridge still supports exactly two strict cases: canonical
+pre-receipt reconstruction, and recovery of an exact active receipt whose
+authority is missing. It does not trust `NO_CHANGES`, the current diff, or the
+environment. A receipt with authority, or stale, forged, or tampered state,
+fails closed. Product, Adapter, repository, secret-pattern, or `.task-state`
+paths also fail closed. This remains the Issue #83/#85 route.
+
+The canonical consumer correction is narrower than generic editing or deletion:
+
+```sh
+AUTOMATION_MAINTENANCE=1 just automation::rebind-maintenance-provenance <trusted-source-at-expected-HEAD> <expected-revision>
+```
+
+For older consumers, the Templates source bridge is:
+
+```sh
+just agent-core::rebind-maintenance-provenance <consumer-worktree> <expected-revision>
+```
+
+It verifies bootstrap/engine trust, reconstructs old and expected immutable
+objects from the same Templates object database, requires the expected
+canonical diff and exact safe pending paths/fingerprints, and leaves tracked
+files unchanged. It reports `PROVENANCE_REBOUND` or idempotent
+`PROVENANCE_ALREADY_BOUND`; then run ordinary consumer verification and the
+existing `automation::commit`.
+
+Eligibility is exact: registered maintenance Task/worktree/branch/HEAD; one
+standard active receipt matching exactly one authority; safe pending Agent
+Core paths/fingerprints only; no consumed, source-recovery, or ambiguous state;
+the old and expected revisions in the same Templates object database; and an
+identical expected canonical diff. Missing authority remains the Issue #85
+route. Committed or consumed state, including a crossed guarded publication
+boundary, is rejected. Handled
+failures roll back safely and concurrency fails closed. No cross-filesystem
+atomicity or hard-crash durability is claimed; that remains Issue #89 scope.
 
 The receipt is schema-1 JSON containing Task identity (`task_id`, `branch`, and
 `worktree`), source/source revision, current/upstream versions, sorted unique

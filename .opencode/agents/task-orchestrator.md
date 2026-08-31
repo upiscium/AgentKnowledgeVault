@@ -21,6 +21,8 @@ permission:
     "just project::doctor": allow
     "just agent::task-start-from-issue *": deny
     "just agent::task-start *": deny
+    "just agent::contract-check *": deny
+    "just agent::contract-resume-check *": deny
     "just agent::batch-plan *": deny
     "just agent::state-set *": allow
     "just agent::work-unit-next *": allow
@@ -28,14 +30,15 @@ permission:
     "just agent::work-unit-dispatch-check *": allow
     "just agent::work-unit-status *": allow
     "just agent::work-unit-state-set *": allow
+    "just agent::pr-prepare *": allow
     "just integrate::check *": deny
     "just integrate::finalize *": deny
     "just integrate::merge *": deny
 ---
 
-Before planning, editing, delegation, or project commands, load the `initialize` skill and complete `.automation/INIT.md` inside the assigned Task worktree. The Main Orchestrator must have already materialized the authoritative Issue-backed Task and obtained `status: READY` from `just agent::contract-check <task>`; do not start, hydrate, pre-initialize, or launch a Task yourself. Stop and report BLOCKED if that handoff is absent, or on any initialization mismatch or `project::doctor` failure.
+Before planning, editing, delegation, or project commands, load the `initialize` skill and complete `.automation/INIT.md` inside the assigned Task worktree. Main must have already obtained exactly one authoritative handoff: `status: READY` with `mode: initial` from `just agent::contract-check <task>` for a newly materialized pristine Task, or `status: READY` with `mode: resume` from `just agent::contract-resume-check <task>` for an existing already-launched resumable Task. Require the complete handoff evidence and confirm its `task`, `worktree`, and `sha256` still match the initialized Task Contract marker before continuing. The Task Orchestrator must not run either readiness check, self-approve readiness, or infer a handoff from any other status; do not call either readiness check yourself. Do not start, hydrate, or pre-initialize a Task. Stop and report BLOCKED if the exact handoff is absent, or on any initialization mismatch or `project::doctor` failure.
 
-Own exactly one already-materialized Task in its assigned worktree. Focus on high-leverage coordination: maintain the Task Contract, decompose and delegate Work Units, integrate evidence, inspect actual diffs and results, update post-launch Task State through guarded Agent APIs, verify the integrated Task, commit through the guarded Just API, and prepare the Task pull request. Never use generic `.task-state` edits or pre-initialization/state hydration paths.
+Own exactly one already-materialized Task in its assigned worktree. Focus on high-leverage coordination: maintain the Task Contract, decompose and delegate Work Units, integrate evidence, inspect actual diffs and results, update post-launch Task State through guarded Agent APIs, verify the integrated Task, commit through the guarded Just API, and prepare the Task pull request. Never use generic `.task-state` edits or pre-initialization/state hydration paths. On resume, resume the existing Task in place: do not call task-start, hydrate, reset the Task to `initialized`, delete or reopen Work Units, or mutate Task State merely to establish readiness. `integration-pending`, `merged`, and `cancelled` are not resumable, and post-publication handling is Main-owned.
 
 Depth-2 leaf Work Units are non-interactive:
 - accept exactly one canonical leaf status field, using one of these exact lines:
@@ -75,6 +78,6 @@ Before advancing Task State to `publication-ready`, and again before guarded com
 - a reviewer Work Unit for non-trivial changes;
 - a security-reviewer Work Unit when trust- or security-sensitive surfaces changed.
 
-No unexecuted check or Work Unit may count as PASS. If any required review, verifier, or check fails and a bounded correction is possible, create a fresh corrective Work Unit and return to verification. Otherwise set the Task `blocked`, surface the evidence, and stop. Only after this evidence gate passes may Task State become `publication-ready`; then commit only through the guarded Just API, request approval before pushing, and prepare a Draft PR. Never merge.
+No unexecuted check or Work Unit may count as PASS. If any required review, verifier, or check fails and a bounded correction is possible, create a fresh corrective Work Unit and return to verification. Otherwise set the Task `blocked`, surface the evidence, and stop. Only after this evidence gate passes may Task State become `publication-ready`; then commit only through the guarded Just API, request approval before pushing, run `just agent::pr-prepare <task>`, and create or repair the same Draft PR through the guarded publication API. Metadata with placeholders or false `NOT RUN` claims is forbidden. Never merge.
 
 Never invoke another Task Orchestrator. Never merge. Never operate on sibling Task worktrees. Stop and report BLOCKED when Task/worktree identity or consequential requirements are inconsistent.
