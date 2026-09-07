@@ -3,6 +3,7 @@
 from .budget import ExactTokenCounter, accounting_payload
 from .eligibility import EligibilityCounts, EligibilityResult, RetrievalEligibility
 from .embeddings import (
+    MAX_SEMANTIC_DOCUMENT_BYTES,
     SEMANTIC_DOCUMENT_REPRESENTATION_VERSION,
     EmbeddingProvider,
     EmbeddingProviderIdentity,
@@ -19,24 +20,42 @@ from .embeddings import (
 )
 from .fake_embeddings import DeterministicEmbeddingProvider
 from .models import RetrievalDiagnostics, RetrievalResult
+from .rerank import (
+    DeterministicRerankProvider,
+    RerankCandidate,
+    RerankedCandidate,
+    RerankProvider,
+    union_candidates,
+)
 from .semantic_candidates import (
     SemanticCandidate,
     SemanticCandidateGenerator,
     SemanticCandidateResult,
     SemanticCandidateService,
 )
-from .service import Level0RetrievalService
+from .service import (
+    HybridRetrievalService,
+    Level0RetrievalService,
+    Level1RetrievalService,
+)
 
 __all__ = [
+    "MAX_SEMANTIC_DOCUMENT_BYTES",
     "SEMANTIC_DOCUMENT_REPRESENTATION_VERSION",
     "DeterministicEmbeddingProvider",
+    "DeterministicRerankProvider",
     "EligibilityCounts",
     "EligibilityResult",
     "EmbeddingProvider",
     "EmbeddingProviderIdentity",
     "EmbeddingValidationError",
     "ExactTokenCounter",
+    "HybridRetrievalService",
     "Level0RetrievalService",
+    "Level1RetrievalService",
+    "RerankCandidate",
+    "RerankProvider",
+    "RerankedCandidate",
     "RetrievalDiagnostics",
     "RetrievalEligibility",
     "RetrievalResult",
@@ -50,6 +69,7 @@ __all__ = [
     "embedding_document",
     "semantic_document",
     "semantic_document_representation",
+    "union_candidates",
     "validate_embedding_provider",
     "validate_embedding_vector",
     "validate_embedding_vectors",

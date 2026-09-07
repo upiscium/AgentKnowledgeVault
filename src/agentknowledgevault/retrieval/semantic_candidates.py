@@ -22,6 +22,12 @@ from .embeddings import (
 )
 from .semantic_index import DerivedSemanticIndex, SemanticIndexSyncResult
 
+MAX_SEMANTIC_CANDIDATES = 32
+# This is an explicit, deterministic provider-input bound.  Records are sorted
+# by public reference before this cap is applied, so corpus insertion order
+# cannot change which documents reach an embedding provider.
+MAX_SEMANTIC_RECORDS = 256
+
 
 @dataclass(frozen=True)
 class SemanticCandidate:
@@ -50,6 +56,9 @@ class SemanticCandidate:
 class SemanticCandidateResult:
     candidates: tuple[SemanticCandidate, ...]
     synchronization: SemanticIndexSyncResult
+    records_seen: int = 0
+    records_truncated: int = 0
+    record_cap: int = MAX_SEMANTIC_RECORDS
 
 
 def utc_now() -> datetime:
@@ -72,10 +81,13 @@ class SemanticCandidateService:
     ) -> SemanticCandidateResult:
         source = list(records)
         eligible, _ = self._eligibility.filter(source, scope, now or utc_now())
+        bounded = sorted(eligible, key=lambda record: record.knowledge_ref)
+        truncated = max(0, len(bounded) - MAX_SEMANTIC_RECORDS)
+        bounded = bounded[:MAX_SEMANTIC_RECORDS]
         # Ineligible records never reach semantic_document/embed_documents.
-        synchronization = self.index.synchronize(eligible)
+        synchronization = self.index.synchronize(bounded)
         try:
-            hits = self.index.search(query, (r.knowledge_ref for r in eligible))
+            hits = self.index.search(query, (r.knowledge_ref for r in bounded))
         except (
             sqlite3.DatabaseError,
             EmbeddingValidationError,
@@ -86,8 +98,15 @@ class SemanticCandidateService:
             # derived file may disappear, become corrupt, or change vector
             # space in between them.  Rebuild only from the already gated set,
             # then retry exactly once.
-            synchronization = self.index.rebuild(eligible)
-            hits = self.index.search(query, (r.knowledge_ref for r in eligible))
+            synchronization = self.index.rebuild(bounded)
+            hits = self.index.search(query, (r.knowledge_ref for r in bounded))
+        # Search can produce one hit per eligible record.  Bound the provider
+        # result here (rather than rejecting an otherwise valid large result)
+        # with an explicit score/ref ordering that is independent of storage
+        # and provider iteration order.
+        hits = sorted(hits, key=lambda hit: (-hit.score, hit.knowledge_ref))[
+            :MAX_SEMANTIC_CANDIDATES
+        ]
         identity = validate_embedding_provider(self.index.provider)
         candidates = tuple(
             SemanticCandidate(
@@ -99,7 +118,12 @@ class SemanticCandidateService:
             )
             for hit in hits
         )
-        return SemanticCandidateResult(candidates, synchronization)
+        return SemanticCandidateResult(
+            candidates,
+            synchronization,
+            records_seen=len(eligible),
+            records_truncated=truncated,
+        )
 
     # Explicit aliases keep the internal API easy to discover without creating
     # a caller-facing Level 1 orchestration surface.

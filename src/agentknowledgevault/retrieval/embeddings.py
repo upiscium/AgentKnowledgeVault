@@ -17,6 +17,22 @@ from agentknowledgevault.vault.models import KnowledgeRecord
 
 EmbeddingVector: TypeAlias = Sequence[float]
 SEMANTIC_DOCUMENT_REPRESENTATION_VERSION = "semantic-document-v1"
+# Provider input is bounded in UTF-8 bytes.  The bound is applied while the
+# canonical JSON is built, rather than by slicing the serialized document, so
+# every truncated document still contains its representation version marker.
+MAX_SEMANTIC_DOCUMENT_BYTES = 8192
+# Character naming is retained as a discoverable alias for callers that only
+# need an input-size limit; the enforced contract is the byte bound above.
+MAX_SEMANTIC_DOCUMENT_CHARS = MAX_SEMANTIC_DOCUMENT_BYTES
+
+# These are deliberately conservative character limits.  JSON escaping can
+# expand a character to six bytes, so fixed pre-serialization limits provide a
+# hard upper bound without serializing an attacker-sized value or repeatedly
+# rebuilding a near-limit document.  The tag count is bounded as well: the
+# list itself is untrusted input.
+_MAX_SEMANTIC_TEXT_CHARS = 240
+_MAX_SEMANTIC_TAGS = 4
+_MAX_SEMANTIC_TAG_CHARS = 48
 
 
 class EmbeddingProvider(Protocol):
@@ -158,13 +174,26 @@ def embed_query(provider: EmbeddingProvider, text: str) -> tuple[float, ...]:
 
 def semantic_document(record: KnowledgeRecord) -> str:
     """Build the versioned canonical JSON document sent to an embedder."""
+
+    # Bound every untrusted component before handing the aggregate to JSON.
+    # Slicing by characters preserves valid Unicode while ensuring both the
+    # amount of work and the size of intermediate values are fixed.
+    def bounded(value: str, limit: int) -> str:
+        return value[:limit]
+
     payload: dict[str, JsonValue] = {
-        "body": record.body,
-        "knowledge_path": record.knowledge_path,
-        "namespace": record.namespace,
+        "body": bounded(record.body, _MAX_SEMANTIC_TEXT_CHARS),
+        "knowledge_path": bounded(record.knowledge_path, _MAX_SEMANTIC_TEXT_CHARS),
+        "namespace": bounded(record.namespace, _MAX_SEMANTIC_TEXT_CHARS),
         "representation_version": SEMANTIC_DOCUMENT_REPRESENTATION_VERSION,
-        "tags": cast(list[JsonValue], list(record.tags)),
-        "title": record.title,
+        "tags": cast(
+            list[JsonValue],
+            [
+                bounded(tag, _MAX_SEMANTIC_TAG_CHARS)
+                for tag in record.tags[:_MAX_SEMANTIC_TAGS]
+            ],
+        ),
+        "title": bounded(record.title, _MAX_SEMANTIC_TEXT_CHARS),
     }
     return canonical_json(payload)
 

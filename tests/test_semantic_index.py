@@ -7,6 +7,11 @@ from pathlib import Path
 
 import pytest
 
+from agentknowledgevault.retrieval.embeddings import (
+    MAX_SEMANTIC_DOCUMENT_BYTES,
+    SEMANTIC_DOCUMENT_REPRESENTATION_VERSION,
+    semantic_document,
+)
 from agentknowledgevault.retrieval.semantic_candidates import SemanticCandidateService
 from agentknowledgevault.retrieval.semantic_index import DerivedSemanticIndex
 from agentknowledgevault.vault.models import KnowledgeRecord, KnowledgeStatus
@@ -20,9 +25,13 @@ class FakeProvider:
     def __init__(self) -> None:
         self.fail = False
         self.document_calls = 0
+        self.last_documents_count = 0
+        self.last_documents: tuple[str, ...] = ()
 
     def embed_documents(self, texts: Sequence[str]) -> list[list[float]]:
         self.document_calls += 1
+        self.last_documents_count = len(texts)
+        self.last_documents = tuple(texts)
         if self.fail:
             raise RuntimeError("provider unavailable")
         vectors: list[list[float]] = []
@@ -88,6 +97,58 @@ def test_first_sync_noop_and_explicit_rebuild(tmp_path: Path) -> None:
     assert provider.document_calls == 1
     assert index.rebuild(records()).rebuilt
     assert provider.document_calls == 2
+
+
+def test_large_bodies_are_bounded_before_embedding_and_keep_representation_version(
+    tmp_path: Path,
+) -> None:
+    provider = FakeProvider()
+    source = record("vault://large", title="large")
+    source = replace(source, body="x" * (MAX_SEMANTIC_DOCUMENT_BYTES * 4))
+    index = DerivedSemanticIndex(
+        tmp_path / "semantic.sqlite",
+        provider,
+        canonical_database_path=tmp_path / "vault.sqlite",
+    )
+
+    index.synchronize([source])
+
+    document = semantic_document(source)
+    assert len(document.encode("utf-8")) <= MAX_SEMANTIC_DOCUMENT_BYTES
+    assert (
+        f'"representation_version":"{SEMANTIC_DOCUMENT_REPRESENTATION_VERSION}"'
+        in document
+    )
+    assert provider.last_documents == (document,)
+
+
+def test_all_semantic_document_fields_are_bounded_in_actual_provider_payload(
+    tmp_path: Path,
+) -> None:
+    provider = FakeProvider()
+    source = replace(
+        record("vault://large", title="title"),
+        title="é" * MAX_SEMANTIC_DOCUMENT_BYTES,
+        tags=["标签" * MAX_SEMANTIC_DOCUMENT_BYTES] * 4,
+        namespace="命名空间" * MAX_SEMANTIC_DOCUMENT_BYTES,
+        knowledge_path="路径" * MAX_SEMANTIC_DOCUMENT_BYTES,
+        body="正文" * MAX_SEMANTIC_DOCUMENT_BYTES,
+    )
+    index = DerivedSemanticIndex(
+        tmp_path / "semantic.sqlite",
+        provider,
+        canonical_database_path=tmp_path / "vault.sqlite",
+    )
+
+    index.synchronize([source])
+
+    payload = provider.last_documents[0]
+    assert len(payload.encode("utf-8")) <= MAX_SEMANTIC_DOCUMENT_BYTES
+    assert (
+        f'"representation_version":"{SEMANTIC_DOCUMENT_REPRESENTATION_VERSION}"'
+        in payload
+    )
+    assert provider.last_documents == (semantic_document(source),)
 
 
 def test_corrupt_deleted_and_incompatible_databases_recover(tmp_path: Path) -> None:

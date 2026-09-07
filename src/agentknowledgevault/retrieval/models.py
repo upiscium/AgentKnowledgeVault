@@ -44,6 +44,16 @@ class RetrievalDiagnostics:
     index_watermark: str
     serialized_bytes: int
     elapsed_ms: float
+    level: int = 0
+    path: tuple[int, ...] = (0,)
+    lexical_candidate_count: int = 0
+    semantic_candidate_count: int = 0
+    reranker_provider_id: str | None = None
+    reranker_model_id: str | None = None
+    fallback_reason: str | None = None
+    semantic_records_seen: int = 0
+    semantic_records_truncated: int = 0
+    semantic_record_cap: int | None = None
 
 
 @dataclass(frozen=True)
