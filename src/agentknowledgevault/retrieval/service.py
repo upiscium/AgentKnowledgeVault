@@ -21,7 +21,6 @@ from .eligibility import (
     record_freshness,
     scope_specificity,
 )
-from .fake_embeddings import DeterministicEmbeddingProvider
 from .index import DerivedLexicalIndex, normalized_terms
 from .models import (
     RankedKnowledge,
@@ -33,7 +32,6 @@ from .request import parse_retrieval_request
 from .rerank import (
     MAX_PROVIDER_DOCUMENT_BYTES,
     MAX_RERANK_CANDIDATES,
-    DeterministicRerankProvider,
     RerankCandidate,
     RerankedCandidate,
     bounded_document,
@@ -473,41 +471,77 @@ class Level1RetrievalService:
             if isinstance(level0, VaultRepository)
             else level0
         )
-        provider = embedding_provider or DeterministicEmbeddingProvider()
-        if semantic_service is None:
-            path = (
-                semantic_index_path
-                or self.level0.repository.database_path.with_suffix(
-                    ".level1-semantic.db"
-                )
+        if semantic_service is None and embedding_provider is not None:
+            canonical_path = self.level0.repository.database_path
+            path = semantic_index_path or canonical_path.with_suffix(
+                ".level1-semantic.db"
             )
+            if semantic_index_path is not None:
+                self._validate_semantic_index_path(path, canonical_path)
             semantic_service = SemanticCandidateService(
                 DerivedSemanticIndex(
                     path,
-                    provider,
+                    embedding_provider,
                     canonical_database_path=self.level0.repository.database_path,
                 )
             )
         self.semantic_service = semantic_service
-        self.reranker = rerank_provider or reranker or DeterministicRerankProvider()
+        self.reranker = rerank_provider or reranker
+
+    @staticmethod
+    def _validate_semantic_index_path(
+        path: str | Path, canonical_path: str | Path
+    ) -> None:
+        """Keep caller-selected derived state inside the Vault's app directory."""
+        candidate = Path(path).expanduser()
+        root = Path(canonical_path).expanduser().resolve(strict=False).parent
+        resolved = candidate.resolve(strict=False)
+        try:
+            resolved.relative_to(root)
+        except ValueError as exc:
+            raise ValueError(
+                "semantic index path must be inside the canonical Vault database directory"
+            ) from exc
+        # Match DerivedSemanticIndex's final-component protection.  Resolving
+        # above also prevents an existing parent symlink from escaping root.
+        if candidate.is_symlink():
+            raise ValueError("semantic index database path must not be a symlink")
 
     def retrieve(self, request_value: Mapping[str, Any]) -> RetrievalResult:
         request = parse_retrieval_request(request_value)
         if request.mode == "fast":
             return self.level0.retrieve(request_value)
         started = self.level0._monotonic()
-        # Level 1 can invoke both the embedding and reranking providers.  Do
-        # this check before even synchronizing the semantic index so an
-        # impossible capsule cannot cause provider work (or derived-state
-        # changes) on any Level 1 path.
+        level0_result: RetrievalResult | None = None
+        if request.mode == "auto":
+            # Auto is deliberately conservative: the cheap, canonical path is
+            # authoritative whenever it produced an unambiguous answer.
+            level0_result = self.level0.retrieve(request_value)
+            if not self._needs_escalation(level0_result, request):
+                return self._retime(level0_result, started)
+        # Level 1 has no caller-facing default providers.  An application that
+        # has not explicitly configured both boundaries gets the authoritative
+        # Level 0 result, rather than silently using a test implementation.
+        if self.semantic_service is None or self.reranker is None:
+            return self._retime(
+                level0_result or self.level0.retrieve(request_value),
+                started,
+                fallback_reason="level1_provider_unavailable",
+            )
+        # Thorough may preflight directly; auto reaches this point only after
+        # the deterministic Level 0 path has decided escalation is warranted.
+        # Keep this before any semantic index synchronization or provider call.
         accountant = BudgetAccountant(request, self.level0._token_counters)
-        # Preflight the actual smallest failed Level 1 capsule.  Its retrieval
-        # metadata is larger than Level 0's, so a Level 0-only preflight could
-        # incorrectly start semantic/index/reranker work at the threshold.
         minimum_measurement = accountant.measure(
             accountant.minimum_failed_payload(level=1, path=(0, 1))
         )
         if not minimum_measurement.fits:
+            # Auto has already obtained an authoritative Level 0 answer.  A
+            # budget that can hold that answer but cannot hold the Level 1
+            # protocol envelope must not turn escalation into an error (or
+            # invoke either provider).
+            if request.mode == "auto" and level0_result is not None:
+                return self._retime(level0_result, started)
             return self.level0._result(
                 capsule=None,
                 error=accountant.budget_too_small_error(minimum_measurement),
@@ -519,13 +553,6 @@ class Level1RetrievalService:
                 level=1,
                 path=(0, 1),
             )
-        level0_result: RetrievalResult | None = None
-        if request.mode == "auto":
-            # Auto is deliberately conservative: the cheap, canonical path is
-            # authoritative whenever it produced an unambiguous answer.
-            level0_result = self.level0.retrieve(request_value)
-            if not self._needs_escalation(level0_result, request):
-                return self._retime(level0_result, started)
         try:
             records = self.level0.repository.list_knowledge()
             eligible, counts = self.level0._eligible_records(records, request)
@@ -571,15 +598,32 @@ class Level1RetrievalService:
                 )
                 for hit in semantic_candidates
             ]
-            candidates = union_candidates(
-                lexical_candidates, semantic_candidates_for_rerank
-            )[:MAX_RERANK_CANDIDATES]
+            canonical_winner = self._canonical_winner_ref(level0_result)
+            candidates = self._mixed_candidates(
+                lexical_candidates,
+                semantic_candidates_for_rerank,
+                canonical_winner,
+                by_ref,
+            )
             refs = tuple(item.knowledge_ref for item in candidates)
             ordered = self.reranker.rerank(request.query, candidates)
             ordered_refs = self._validated_rerank_output(ordered, set(refs))
             # Omission is safe and deterministic; unknown or malformed output
             # is not, and is handled by the provider-failure fallback below.
             ordered_refs.extend(ref for ref in refs if ref not in ordered_refs)
+            if request.mode == "auto" and level0_result is not None:
+                # Preserve the strongest lexical candidate before applying the
+                # optional semantic ordering.  This is deliberately based on
+                # ranked evidence, not query IDs or fixture labels: strong
+                # lexical evidence cannot be displaced by a reranker, while new
+                # semantic candidates remain available for recovery.
+                level0_refs = [canonical_winner] if canonical_winner is not None else []
+                visible = set(ordered_refs[: request.budget.max_evidence_items])
+                if level0_refs and level0_refs[0] not in visible:
+                    ordered_refs = [
+                        level0_refs[0],
+                        *(ref for ref in ordered_refs if ref != level0_refs[0]),
+                    ]
             ranked = [by_ref[ref] for ref in ordered_refs]
             accountant = BudgetAccountant(request, self.level0._token_counters)
             capsule, measurement, selected = self.level0._assemble_level(
@@ -608,7 +652,7 @@ class Level1RetrievalService:
             reason = "level1_index_failure"
         except (RuntimeError, TimeoutError, ConnectionError):
             reason = "level1_provider_failure"
-        except ValueError:
+        except (TypeError, ValueError):
             # Provider contract and output validation failures are attributable
             # to the provider boundary, not to the canonical retrieval path.
             reason = "level1_provider_failure"
@@ -642,10 +686,83 @@ class Level1RetrievalService:
         )
 
     @staticmethod
+    def _canonical_winner_ref(result: RetrievalResult | None) -> str | None:
+        """Return the reference actually selected by Level 0, when available."""
+        if result is None or result.capsule is None:
+            return None
+        refs = result.capsule.get("knowledge_refs")
+        if not isinstance(refs, list) or not refs:
+            return None
+        first = refs[0]
+        if not isinstance(first, dict):
+            return None
+        value = first.get("uri")
+        return value if isinstance(value, str) else None
+
+    @staticmethod
+    def _mixed_candidates(
+        lexical: list[RerankCandidate],
+        semantic: list[RerankCandidate],
+        canonical_winner: str | None,
+        by_ref: dict[str, KnowledgeRecord],
+    ) -> tuple[RerankCandidate, ...]:
+        """Bound the union while reserving deterministic room for semantic-only hits."""
+        merged = list(union_candidates(lexical, semantic))
+        merged_refs = {item.knowledge_ref for item in merged}
+        if (
+            canonical_winner is not None
+            and canonical_winner in by_ref
+            and canonical_winner not in merged_refs
+        ):
+            record = by_ref[canonical_winner]
+            merged.insert(
+                0,
+                RerankCandidate(
+                    canonical_winner,
+                    bounded_document(
+                        record.title, record.body, MAX_PROVIDER_DOCUMENT_BYTES
+                    ),
+                ),
+            )
+
+        if len(merged) <= MAX_RERANK_CANDIDATES:
+            return tuple(merged)
+        # Select each protected opportunity explicitly rather than relying on
+        # insertion order: a late lexical Level 0 winner must survive semantic
+        # reserve pressure as well as the ordinary lexical/semantic union.
+        protected: list[RerankCandidate] = []
+        if canonical_winner is not None:
+            protected = [
+                item for item in merged if item.knowledge_ref == canonical_winner
+            ]
+        lexical_refs = {item.knowledge_ref for item in lexical}
+        protected_refs = {item.knowledge_ref for item in protected}
+        semantic_only = [
+            item
+            for item in semantic
+            if item.knowledge_ref not in lexical_refs
+            and item.knowledge_ref not in protected_refs
+        ]
+        reserve = min(
+            len(semantic_only),
+            max(0, MAX_RERANK_CANDIDATES // 4 - len(protected)),
+            MAX_RERANK_CANDIDATES - len(protected),
+        )
+        selected = [*protected, *semantic_only[:reserve]]
+        selected_refs = {item.knowledge_ref for item in selected}
+        for item in merged:
+            if len(selected) >= MAX_RERANK_CANDIDATES:
+                break
+            if item.knowledge_ref not in selected_refs:
+                selected.append(item)
+                selected_refs.add(item.knowledge_ref)
+        return tuple(selected[:MAX_RERANK_CANDIDATES])
+
+    @staticmethod
     def _validated_semantic_candidates(
         candidates: Any, eligible_refs: set[str]
     ) -> tuple[Any, ...]:
-        if not isinstance(candidates, (list, tuple)):
+        if type(candidates) not in (list, tuple):
             raise TypeError("semantic provider returned a non-sequence")
         if len(candidates) > MAX_SEMANTIC_CANDIDATES:
             raise ValueError("semantic provider exceeded output limit")
@@ -682,7 +799,7 @@ class Level1RetrievalService:
 
     @staticmethod
     def _validated_rerank_output(output: Any, allowed_refs: set[str]) -> list[str]:
-        if not isinstance(output, (list, tuple)):
+        if type(output) not in (list, tuple):
             raise TypeError("reranker returned a non-sequence")
         if len(output) > MAX_RERANK_CANDIDATES:
             raise ValueError("reranker exceeded output limit")

@@ -9,6 +9,8 @@ from typing import Any
 
 from agentknowledgevault.evaluation.semantic import _load, _store_records
 from agentknowledgevault.retrieval import Level1RetrievalService
+from agentknowledgevault.retrieval.fake_embeddings import DeterministicEmbeddingProvider
+from agentknowledgevault.retrieval.rerank import DeterministicRerankProvider
 from agentknowledgevault.vault.repository import VaultRepository
 
 
@@ -31,7 +33,10 @@ def generate_level1_report(
     )
     _store_records(repository, fixture["records"])
     service = Level1RetrievalService(
-        repository, semantic_index_path=root / "semantic.db"
+        repository,
+        semantic_index_path=root / "semantic.db",
+        embedding_provider=DeterministicEmbeddingProvider(),
+        rerank_provider=DeterministicRerankProvider(),
     )
     per_query: list[dict[str, Any]] = []
     for item in golden["queries"]:

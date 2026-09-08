@@ -11,10 +11,10 @@
   "metrics": {
     "caller_burden": 7,
     "gate_violations": 0,
-    "mrr": 0.9230769230769231,
+    "mrr": 1.0,
     "no_match_accuracy": 1.0,
     "queries": 13,
-    "recall_at_3": 0.9230769230769231
+    "recall_at_3": 1.0
   },
   "per_query": [
     {
@@ -391,9 +391,9 @@
       "caller_burden": true,
       "candidate_count": 4,
       "candidate_refs": [
+        "vault://global/observability/request-correlation",
         "vault://global/http/request-retry",
-        "vault://global/http/request-routing",
-        "vault://global/http/request-validation"
+        "vault://global/http/request-routing"
       ],
       "expected_ineligible_refs": [],
       "expected_no_match": false,
@@ -410,17 +410,19 @@
       ],
       "query_class": "distractor_heavy",
       "query_id": "q12-distractor-heavy",
-      "recall_at_3": 0.0,
-      "reciprocal_rank": 0.0,
-      "recovered_relevant_refs": [],
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://global/observability/request-correlation"
+      ],
       "selected_count": 3,
       "semantic_candidate_count": 4,
       "status": "degraded",
       "terminal_reason": "budget_limited",
       "top3_refs": [
+        "vault://global/observability/request-correlation",
         "vault://global/http/request-retry",
-        "vault://global/http/request-routing",
-        "vault://global/http/request-validation"
+        "vault://global/http/request-routing"
       ]
     },
     {

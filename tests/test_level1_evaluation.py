@@ -46,6 +46,28 @@ def test_level1_report_is_reproducibly_generated_with_query_evidence(
     )
 
 
+def test_level1_preserves_every_level0_strong_query_class() -> None:
+    baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
+    report = json.loads(REPORT.read_text(encoding="utf-8"))
+    strong_classes = set(baseline["analysis"]["strong_query_classes"])
+    level0 = {
+        item["query_class"]: item
+        for item in baseline["profiles"]["normal"]["per_query"]
+    }
+    level1 = {item["query_class"]: item for item in report["per_query"]}
+
+    assert strong_classes <= level0.keys()
+    assert strong_classes <= level1.keys()
+    for query_class in strong_classes:
+        expected = level0[query_class]
+        actual = level1[query_class]
+        if expected["expected_no_match"]:
+            assert _no_match_is_correct(actual)
+        else:
+            assert actual["recall_at_3"] >= expected["recall_at_3"]
+            assert actual["reciprocal_rank"] >= expected["reciprocal_rank"]
+
+
 def test_level0_baseline_is_not_modified_by_level1_generation() -> None:
     assert hashlib.sha256(BASELINE.read_bytes()).hexdigest() == (
         "d987a6e7e2a82a1b4074306484045d17fb767434e1d1f9f8fd1a1281b89fa48e"
