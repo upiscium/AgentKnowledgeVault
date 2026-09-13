@@ -1,0 +1,560 @@
+{
+  "dataset_version": "level0-golden-v1",
+  "level": 1,
+  "metric_definitions": {
+    "caller_burden": "Count of queries whose diagnostics level is greater than zero.",
+    "gate_violations": "Count of queries whose returned references intersect expected ineligible references.",
+    "mrr": "Mean reciprocal rank of the first expected relevant reference in the first three returned references, over queries with expected relevant references.",
+    "no_match_accuracy": "Fraction of expected-no-match queries returning zero candidate references and zero top-3 references.",
+    "recall_at_3": "Mean fraction of expected relevant references in the first three returned references, over queries with expected relevant references."
+  },
+  "metrics": {
+    "caller_burden": 7,
+    "gate_violations": 0,
+    "mrr": 1.0,
+    "no_match_accuracy": 1.0,
+    "queries": 13,
+    "recall_at_3": 1.0
+  },
+  "per_query": [
+    {
+      "caller_burden": false,
+      "candidate_count": 28,
+      "candidate_refs": [
+        "vault://global/transactions/atomic-write",
+        "vault://global/storage/database-write-lock"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://global/transactions/atomic-write"
+      ],
+      "fallback": true,
+      "gate_violation": false,
+      "level": 0,
+      "lexical_candidate_count": 0,
+      "path": [
+        0
+      ],
+      "query_class": "exact_title",
+      "query_id": "q01-exact-title",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://global/transactions/atomic-write"
+      ],
+      "selected_count": 2,
+      "semantic_candidate_count": 0,
+      "status": "complete",
+      "terminal_reason": "sufficient",
+      "top3_refs": [
+        "vault://global/transactions/atomic-write",
+        "vault://global/storage/database-write-lock"
+      ]
+    },
+    {
+      "caller_burden": false,
+      "candidate_count": 28,
+      "candidate_refs": [
+        "vault://global/storage/derived-lexical-index"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://global/storage/derived-lexical-index"
+      ],
+      "fallback": true,
+      "gate_violation": false,
+      "level": 0,
+      "lexical_candidate_count": 0,
+      "path": [
+        0
+      ],
+      "query_class": "exact_tag",
+      "query_id": "q02-exact-tag",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://global/storage/derived-lexical-index"
+      ],
+      "selected_count": 1,
+      "semantic_candidate_count": 0,
+      "status": "complete",
+      "terminal_reason": "sufficient",
+      "top3_refs": [
+        "vault://global/storage/derived-lexical-index"
+      ]
+    },
+    {
+      "caller_burden": false,
+      "candidate_count": 28,
+      "candidate_refs": [
+        "vault://project/terreate/buffer-write-contract"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://project/terreate/buffer-write-contract"
+      ],
+      "fallback": true,
+      "gate_violation": false,
+      "level": 0,
+      "lexical_candidate_count": 0,
+      "path": [
+        0
+      ],
+      "query_class": "technical_identifier",
+      "query_id": "q03-technical-identifier",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://project/terreate/buffer-write-contract"
+      ],
+      "selected_count": 1,
+      "semantic_candidate_count": 0,
+      "status": "complete",
+      "terminal_reason": "sufficient",
+      "top3_refs": [
+        "vault://project/terreate/buffer-write-contract"
+      ]
+    },
+    {
+      "caller_burden": false,
+      "candidate_count": 28,
+      "candidate_refs": [
+        "vault://global/execution/effect-time-validation"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://global/execution/effect-time-validation"
+      ],
+      "fallback": true,
+      "gate_violation": false,
+      "level": 0,
+      "lexical_candidate_count": 0,
+      "path": [
+        0
+      ],
+      "query_class": "body_lexical",
+      "query_id": "q04-body-lexical",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://global/execution/effect-time-validation"
+      ],
+      "selected_count": 1,
+      "semantic_candidate_count": 0,
+      "status": "complete",
+      "terminal_reason": "sufficient",
+      "top3_refs": [
+        "vault://global/execution/effect-time-validation"
+      ]
+    },
+    {
+      "caller_burden": false,
+      "candidate_count": 28,
+      "candidate_refs": [
+        "vault://global/events/append-only-history",
+        "vault://global/transactions/atomic-write"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://global/events/append-only-history"
+      ],
+      "fallback": true,
+      "gate_violation": false,
+      "level": 0,
+      "lexical_candidate_count": 0,
+      "path": [
+        0
+      ],
+      "query_class": "multi_term",
+      "query_id": "q05-multi-term",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://global/events/append-only-history"
+      ],
+      "selected_count": 2,
+      "semantic_candidate_count": 0,
+      "status": "complete",
+      "terminal_reason": "sufficient",
+      "top3_refs": [
+        "vault://global/events/append-only-history",
+        "vault://global/transactions/atomic-write"
+      ]
+    },
+    {
+      "caller_burden": false,
+      "candidate_count": 28,
+      "candidate_refs": [
+        "vault://project/terreate/scope-shared"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://project/terreate/scope-shared"
+      ],
+      "fallback": true,
+      "gate_violation": false,
+      "level": 0,
+      "lexical_candidate_count": 0,
+      "path": [
+        0
+      ],
+      "query_class": "global_project_scope",
+      "query_id": "q06-project-scope",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://project/terreate/scope-shared"
+      ],
+      "selected_count": 1,
+      "semantic_candidate_count": 0,
+      "status": "complete",
+      "terminal_reason": "sufficient",
+      "top3_refs": [
+        "vault://project/terreate/scope-shared"
+      ]
+    },
+    {
+      "caller_burden": true,
+      "candidate_count": 0,
+      "candidate_refs": [],
+      "expected_ineligible_refs": [
+        "vault://project/terreatex/scope-lookalike"
+      ],
+      "expected_no_match": true,
+      "expected_relevant_refs": [],
+      "fallback": false,
+      "gate_violation": false,
+      "level": 1,
+      "lexical_candidate_count": 0,
+      "path": [
+        0,
+        1
+      ],
+      "query_class": "near_lookalike",
+      "query_id": "q07-near-lookalike",
+      "recall_at_3": null,
+      "reciprocal_rank": 0.0,
+      "recovered_relevant_refs": [],
+      "selected_count": 0,
+      "semantic_candidate_count": 0,
+      "status": "failed",
+      "terminal_reason": "insufficient_evidence",
+      "top3_refs": []
+    },
+    {
+      "caller_burden": true,
+      "candidate_count": 1,
+      "candidate_refs": [
+        "vault://global/execution/effect-time-validation"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://global/execution/effect-time-validation"
+      ],
+      "fallback": false,
+      "gate_violation": false,
+      "level": 1,
+      "lexical_candidate_count": 0,
+      "path": [
+        0,
+        1
+      ],
+      "query_class": "synonym_paraphrase",
+      "query_id": "q08-synonym-paraphrase",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://global/execution/effect-time-validation"
+      ],
+      "selected_count": 1,
+      "semantic_candidate_count": 1,
+      "status": "complete",
+      "terminal_reason": "sufficient",
+      "top3_refs": [
+        "vault://global/execution/effect-time-validation"
+      ]
+    },
+    {
+      "caller_burden": true,
+      "candidate_count": 1,
+      "candidate_refs": [
+        "vault://global/network/transport-layer-security"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://global/network/transport-layer-security"
+      ],
+      "fallback": false,
+      "gate_violation": false,
+      "level": 1,
+      "lexical_candidate_count": 0,
+      "path": [
+        0,
+        1
+      ],
+      "query_class": "abbreviation_expanded_form",
+      "query_id": "q09-abbreviation",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://global/network/transport-layer-security"
+      ],
+      "selected_count": 1,
+      "semantic_candidate_count": 1,
+      "status": "complete",
+      "terminal_reason": "sufficient",
+      "top3_refs": [
+        "vault://global/network/transport-layer-security"
+      ]
+    },
+    {
+      "caller_burden": false,
+      "candidate_count": 28,
+      "candidate_refs": [
+        "vault://global/storage/database-write-lock",
+        "vault://global/transactions/atomic-write"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://global/storage/database-write-lock"
+      ],
+      "fallback": true,
+      "gate_violation": false,
+      "level": 0,
+      "lexical_candidate_count": 0,
+      "path": [
+        0
+      ],
+      "query_class": "common_noise_query",
+      "query_id": "q10-common-noise",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://global/storage/database-write-lock"
+      ],
+      "selected_count": 2,
+      "semantic_candidate_count": 0,
+      "status": "complete",
+      "terminal_reason": "sufficient",
+      "top3_refs": [
+        "vault://global/storage/database-write-lock",
+        "vault://global/transactions/atomic-write"
+      ]
+    },
+    {
+      "caller_burden": false,
+      "candidate_count": 28,
+      "candidate_refs": [
+        "vault://global/cache/invalidation",
+        "vault://project/terreate/cache-invalidation"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://global/cache/invalidation",
+        "vault://project/terreate/cache-invalidation"
+      ],
+      "fallback": true,
+      "gate_violation": false,
+      "level": 0,
+      "lexical_candidate_count": 0,
+      "path": [
+        0
+      ],
+      "query_class": "multiple_relevant_refs",
+      "query_id": "q11-multiple-relevant",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://global/cache/invalidation",
+        "vault://project/terreate/cache-invalidation"
+      ],
+      "selected_count": 2,
+      "semantic_candidate_count": 0,
+      "status": "complete",
+      "terminal_reason": "sufficient",
+      "top3_refs": [
+        "vault://global/cache/invalidation",
+        "vault://project/terreate/cache-invalidation"
+      ]
+    },
+    {
+      "caller_burden": true,
+      "candidate_count": 4,
+      "candidate_refs": [
+        "vault://global/observability/request-correlation",
+        "vault://global/http/request-retry",
+        "vault://global/http/request-routing"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://global/observability/request-correlation"
+      ],
+      "fallback": false,
+      "gate_violation": false,
+      "level": 1,
+      "lexical_candidate_count": 4,
+      "path": [
+        0,
+        1
+      ],
+      "query_class": "distractor_heavy",
+      "query_id": "q12-distractor-heavy",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://global/observability/request-correlation"
+      ],
+      "selected_count": 3,
+      "semantic_candidate_count": 4,
+      "status": "degraded",
+      "terminal_reason": "budget_limited",
+      "top3_refs": [
+        "vault://global/observability/request-correlation",
+        "vault://global/http/request-retry",
+        "vault://global/http/request-routing"
+      ]
+    },
+    {
+      "caller_burden": true,
+      "candidate_count": 0,
+      "candidate_refs": [],
+      "expected_ineligible_refs": [],
+      "expected_no_match": true,
+      "expected_relevant_refs": [],
+      "fallback": false,
+      "gate_violation": false,
+      "level": 1,
+      "lexical_candidate_count": 0,
+      "path": [
+        0,
+        1
+      ],
+      "query_class": "no_match",
+      "query_id": "q13-no-match",
+      "recall_at_3": null,
+      "reciprocal_rank": 0.0,
+      "recovered_relevant_refs": [],
+      "selected_count": 0,
+      "semantic_candidate_count": 0,
+      "status": "failed",
+      "terminal_reason": "insufficient_evidence",
+      "top3_refs": []
+    },
+    {
+      "caller_burden": true,
+      "candidate_count": 0,
+      "candidate_refs": [],
+      "expected_ineligible_refs": [
+        "vault://global/eligibility/candidate",
+        "vault://global/eligibility/conditional",
+        "vault://global/eligibility/deprecated",
+        "vault://global/eligibility/stale",
+        "vault://global/eligibility/verified"
+      ],
+      "expected_no_match": true,
+      "expected_relevant_refs": [],
+      "fallback": false,
+      "gate_violation": false,
+      "level": 1,
+      "lexical_candidate_count": 0,
+      "path": [
+        0,
+        1
+      ],
+      "query_class": "stale_noncanonical_conditional_distractor",
+      "query_id": "q14-eligibility-distractors",
+      "recall_at_3": null,
+      "reciprocal_rank": 0.0,
+      "recovered_relevant_refs": [],
+      "selected_count": 0,
+      "semantic_candidate_count": 0,
+      "status": "failed",
+      "terminal_reason": "insufficient_evidence",
+      "top3_refs": []
+    },
+    {
+      "caller_burden": true,
+      "candidate_count": 7,
+      "candidate_refs": [
+        "vault://global/ranking/z-authoritative",
+        "vault://global/ranking/a-distractor",
+        "vault://global/ranking/b-distractor"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://global/ranking/z-authoritative"
+      ],
+      "fallback": false,
+      "gate_violation": false,
+      "level": 1,
+      "lexical_candidate_count": 7,
+      "path": [
+        0,
+        1
+      ],
+      "query_class": "ranking_sensitive",
+      "query_id": "q15-ranking-sensitive",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://global/ranking/z-authoritative"
+      ],
+      "selected_count": 3,
+      "semantic_candidate_count": 4,
+      "status": "degraded",
+      "terminal_reason": "budget_limited",
+      "top3_refs": [
+        "vault://global/ranking/z-authoritative",
+        "vault://global/ranking/a-distractor",
+        "vault://global/ranking/b-distractor"
+      ]
+    },
+    {
+      "caller_burden": false,
+      "candidate_count": 28,
+      "candidate_refs": [
+        "vault://global/network/transport-layer-security"
+      ],
+      "expected_ineligible_refs": [],
+      "expected_no_match": false,
+      "expected_relevant_refs": [
+        "vault://global/network/transport-layer-security"
+      ],
+      "fallback": true,
+      "gate_violation": false,
+      "level": 0,
+      "lexical_candidate_count": 0,
+      "path": [
+        0
+      ],
+      "query_class": "expanded_form",
+      "query_id": "q16-expanded-form",
+      "recall_at_3": 1.0,
+      "reciprocal_rank": 1.0,
+      "recovered_relevant_refs": [
+        "vault://global/network/transport-layer-security"
+      ],
+      "selected_count": 1,
+      "semantic_candidate_count": 0,
+      "status": "complete",
+      "terminal_reason": "sufficient",
+      "top3_refs": [
+        "vault://global/network/transport-layer-security"
+      ]
+    }
+  ],
+  "query_count": 16,
+  "schema_version": "level1-evaluation-v1"
+}

@@ -2,7 +2,9 @@
 
 from .retrieval import (
     ExactTokenCounter,
+    HybridRetrievalService,
     Level0RetrievalService,
+    Level1RetrievalService,
     RetrievalDiagnostics,
     RetrievalResult,
     accounting_payload,
@@ -27,6 +29,7 @@ from .vault import (
 __all__ = [
     "EventType",
     "ExactTokenCounter",
+    "HybridRetrievalService",
     "InvalidKnowledgeIdentityError",
     "InvalidLifecycleTransitionError",
     "InvalidMetadataError",
@@ -36,6 +39,7 @@ __all__ = [
     "KnowledgeRecord",
     "KnowledgeStatus",
     "Level0RetrievalService",
+    "Level1RetrievalService",
     "RetrievalDiagnostics",
     "RetrievalResult",
     "StaleRevisionError",

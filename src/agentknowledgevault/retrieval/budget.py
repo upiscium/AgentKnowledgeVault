@@ -100,7 +100,9 @@ class BudgetAccountant:
         capsule["budget"] = report
         return capsule, measurement
 
-    def minimum_failed_payload(self) -> dict[str, Any]:
+    def minimum_failed_payload(
+        self, *, level: int = 0, path: tuple[int, ...] = (0,)
+    ) -> dict[str, Any]:
         return {
             "schema_version": "0.1",
             "status": "failed",
@@ -121,8 +123,8 @@ class BudgetAccountant:
             "evidence": [],
             "retrieval": {
                 "mode": self.request.mode,
-                "level": 0,
-                "path": [0],
+                "level": level,
+                "path": list(path),
                 "terminal_reason": "budget_limited",
             },
         }

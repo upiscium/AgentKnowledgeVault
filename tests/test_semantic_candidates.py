@@ -9,6 +9,10 @@ from test_semantic_index import FakeProvider, record
 from agentknowledgevault.retrieval import (
     SemanticCandidateService,
 )
+from agentknowledgevault.retrieval.semantic_candidates import (
+    MAX_SEMANTIC_CANDIDATES,
+    MAX_SEMANTIC_RECORDS,
+)
 from agentknowledgevault.retrieval.semantic_index import DerivedSemanticIndex
 from agentknowledgevault.vault.models import KnowledgeStatus
 
@@ -81,3 +85,41 @@ def test_search_identity_mismatch_is_rebuilt_before_results_are_returned(
     result = service.generate([item], "query", ["project"])
     assert result.synchronization.rebuilt
     assert result.candidates[0].model_id == "test-model"
+
+
+def test_large_eligible_input_is_bounded_before_embedding_provider_call(
+    tmp_path,
+) -> None:
+    provider = FakeProvider()
+    service = SemanticCandidateService(
+        DerivedSemanticIndex(
+            tmp_path / "semantic.db",
+            provider,
+            canonical_database_path=tmp_path / "vault.db",
+        )
+    )
+    records = [record(f"vault://project/{index:03d}") for index in range(300)]
+    result = service.generate(records, "query", ["project"])
+    assert result.records_seen == 300
+    assert result.records_truncated == 300 - MAX_SEMANTIC_RECORDS
+    assert provider.document_calls == 1
+    assert provider.last_documents_count == MAX_SEMANTIC_RECORDS
+
+
+def test_large_search_result_is_ranked_and_capped_deterministically(tmp_path) -> None:
+    provider = FakeProvider()
+    service = SemanticCandidateService(
+        DerivedSemanticIndex(
+            tmp_path / "semantic.db",
+            provider,
+            canonical_database_path=tmp_path / "vault.db",
+        )
+    )
+    records = [record(f"vault://project/{index:02d}", "first") for index in range(40)]
+
+    result = service.generate(records, "query", ["project"])
+
+    assert len(result.candidates) == MAX_SEMANTIC_CANDIDATES
+    assert [item.knowledge_ref for item in result.candidates] == [
+        f"vault://project/{index:02d}" for index in range(MAX_SEMANTIC_CANDIDATES)
+    ]
